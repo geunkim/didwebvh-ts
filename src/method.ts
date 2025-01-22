@@ -247,11 +247,19 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
         options.witnessProofs = await fetchWitnessProofs(did);
       }
 
-      await verifyWitnessProofs(
-        resolutionLog[i],
-        options.witnessProofs!,
-        meta.witness
-      );
+      const validProofs = options.witnessProofs!.filter(wp => {
+        const [wpVersion] = wp.versionId.split('-');
+        const [currentVersion] = versionId.split('-');
+        return parseInt(wpVersion) >= parseInt(currentVersion);
+      });
+
+      if (validProofs.length > 0) {
+        await verifyWitnessProofs(
+          resolutionLog[i],
+          validProofs,
+          meta.witness
+        );
+      }
     }
 
     i++;

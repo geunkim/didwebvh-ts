@@ -49,16 +49,10 @@ export async function verifyWitnessProofs(
   witnessProofs: WitnessProofFileEntry[],
   currentWitness: WitnessParameter
 ): Promise<void> {
-  const validProofs = witnessProofs.filter(wp => wp.versionId === logEntry.versionId);
-  
-  if (validProofs.length === 0) {
-    throw new Error('No valid witness proofs found for version');
-  }
-
   let totalWeight = 0;
   const processedWitnesses = new Set<string>();
 
-  for (const proofSet of validProofs) {
+  for (const proofSet of witnessProofs) {
     for (const proof of proofSet.proof) {
       if (proof.cryptosuite !== 'eddsa-jcs-2022') {
         throw new Error('Invalid witness proof cryptosuite');

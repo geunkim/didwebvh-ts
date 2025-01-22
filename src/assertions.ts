@@ -29,7 +29,12 @@ const isWitnessAuthorized = (verificationMethod: string, witnesses: string[]): b
   return false;
 };
 
-  export const documentStateIsValid = async (doc: any, updateKeys: string[], witness: WitnessParameter | undefined | null) => {
+export const documentStateIsValid = async (
+  doc: any, 
+  updateKeys: string[], 
+  witness: WitnessParameter | undefined | null,
+  skipWitnessVerification?: boolean
+) => {
   if (config.getEnvValue('IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID') === 'true') return true;
   
   let {proof: proofs, ...rest} = doc;
@@ -38,7 +43,9 @@ const isWitnessAuthorized = (verificationMethod: string, witnesses: string[]): b
   }
 
   if (witness && witness.witnesses.length > 0) {
-    validateWitnessParameter(witness);
+    if (!skipWitnessVerification) {
+      validateWitnessParameter(witness);
+    }
   }
 
   for (let i = 0; i < proofs.length; i++) {

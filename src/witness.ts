@@ -5,6 +5,8 @@ import * as ed from '@noble/ed25519';
 import { base58btc } from "multiformats/bases/base58";
 import { resolveVM } from "./utils";
 import { bufferToString, concatBuffers } from './utils/buffer';
+import { config } from './config';
+import { fetchWitnessProofs } from './utils';
 
 
 export function validateWitnessParameter(witness: WitnessParameter): void {
@@ -115,3 +117,5 @@ export async function verifyWitnessProofs(
     throw new Error(`Witness threshold not met: got ${totalWeight}, need ${currentWitness.threshold}`);
   }
 }
+
+export { fetchWitnessProofs }; 

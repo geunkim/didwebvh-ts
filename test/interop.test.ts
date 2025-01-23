@@ -12,6 +12,16 @@ describe("did:webvh interoperability tests", async () => {
     expect(meta.witness?.witnesses.length).toBe(3);
   })
 
+  test("anywhy.ca large", async () => {
+    const did = "did:webvh:QmahiuqDheWp6ZgRC66fsthiALqBFxvYQKk8uTQeqaBUQ2:anywhy.ca:webvh-05-large";
+    const {did: resolvedDID, meta} = await resolveDID(did);
+    expect(resolvedDID).toBe(did);
+    expect(meta.nextKeyHashes.length).toBeGreaterThan(0);
+    expect(meta.prerotation).toBe(true);
+    expect(meta.portable).toBe(false);
+    expect(meta.witness?.witnesses.length).toBe(3);
+  })
+
   test.skip("demo.identifier.me", async () => {
     const did = "did:tdw:QmbkyrrjFQ3Z2WiDfmesKpmeUhemaiqkWgwemovmVaTJfQ:demo.identifier.me:client:c9dd16b7-e079-43da-b0a9-36515e726c6f";
     const {did: resolvedDID, meta} = await resolveDID(did);

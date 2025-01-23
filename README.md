@@ -140,3 +140,43 @@ bun run cli deactivate \
   --log ./did.jsonl \
   --output ./deactivated.jsonl
 ```
+
+## Contributing
+
+### Commit Message Format
+
+This project uses [Semantic Release](https://github.com/semantic-release/semantic-release) for automated version management and package publishing. Commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+
+Format: `<type>(<scope>): <description>` where scope is optional.
+
+#### Types:
+- `feat`: A new feature (triggers a minor version bump)
+- `fix`: A bug fix (triggers a patch version bump)
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semi-colons, etc)
+- `refactor`: Code changes that neither fix a bug nor add a feature
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Changes to build process or auxiliary tools
+
+#### Examples:
+
+```
+feat(resolver): add support for new DID method
+fix: handle null response from endpoint
+docs: update installation instructions
+chore: update dependencies
+```
+
+Breaking changes must include `BREAKING CHANGE:` in the commit message body or footer, or append a `!` after the type/scope.
+
+Example:
+```
+feat(api)!: remove deprecated endpoints
+```
+or
+```
+feat(api): remove deprecated endpoints
+
+BREAKING CHANGE: The following endpoints have been removed...
+```

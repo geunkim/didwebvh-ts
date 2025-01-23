@@ -2,7 +2,7 @@ import { beforeAll, expect, test} from "bun:test";
 import { createDID, resolveDIDFromLog, updateDID } from "../src/method";
 import { mock } from "bun-bagel";
 import { createSigner, generateEd25519VerificationMethod } from "../src/cryptography";
-import { deriveHash, createDate, clone, deriveNextKeyHash, fetchDIDWitnessesFromIdentifier } from "../src/utils";
+import { deriveHash, createDate, clone, deriveNextKeyHash } from "../src/utils";
 import { createMockDIDLog} from './utils';
 import type { DIDLog, VerificationMethod } from "../src/interfaces";
 

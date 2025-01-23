@@ -3,7 +3,8 @@ import { canonicalize } from "json-canonicalize";
 import { createHash } from "./crypto";
 import { concatBuffers } from "./buffer";
 import * as ed from '@noble/ed25519';
-import type { VerificationMethod, DataIntegrityProof } from "../interfaces";
+import type { VerificationMethod, DataIntegrityProof, WitnessProofFileEntry } from "../interfaces";
+import { config } from '../config';
 
 export async function createWitnessProof(
   witness: VerificationMethod,
@@ -32,4 +33,4 @@ export async function createWitnessProof(
     ...proof,
     proofValue: base58btc.encode(signature)
   };
-} 
+}

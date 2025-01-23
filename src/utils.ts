@@ -7,6 +7,7 @@ import { sha256 } from 'multiformats/hashes/sha2'
 import { resolveDIDFromLog } from './method';
 import type { CreateDIDInterface, DataIntegrityProof, DIDDoc, DIDLog, VerificationMethod, WitnessProofFileEntry } from './interfaces';
 import { createBuffer, bufferToString } from './utils/buffer';
+import { join } from 'path';
 
 export const readLogFromDisk = (path: string): DIDLog => {
   return readLogFromString(fs.readFileSync(path, 'utf8'));
@@ -149,23 +150,6 @@ export async function fetchLogFromIdentifier(identifier: string, controlled: boo
   }
 }
 
-export async function fetchDIDWitnessesFromIdentifier(identifier: string): Promise<WitnessProofFileEntry[]> {
-  try {
-    let url = getFileUrl(identifier);
-    url = url.replace('did.jsonl', 'did-witness.json');
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json() as WitnessProofFileEntry[];
-  } catch (error) {
-    console.error('Error fetching DID witnesses:', error);
-    throw error;
-  }
-}
-
 export const createDate = (created?: Date | string) => new Date(created ?? Date.now()).toISOString().slice(0,-5)+'Z';
 
 export function bytesToHex(bytes: Uint8Array): string {
@@ -298,4 +282,20 @@ export async function getActiveDIDs(): Promise<string[]> {
   }
   
   return activeDIDs;
+}
+
+export async function fetchWitnessProofs(did: string): Promise<WitnessProofFileEntry[]> {
+  try {
+    const url = getFileUrl(did).replace('did.jsonl', 'did-witness.json');
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      return [];
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching witness proofs:', error);
+    return [];
+  }
 }

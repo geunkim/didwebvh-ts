@@ -2,14 +2,24 @@ import { describe, expect, test } from "bun:test";
 import { resolveDID } from "../src/method";
 
 describe("did:webvh interoperability tests", async () => {
-  test.skip("anywhy.ca", async () => {
-    const did = "did:webvh:QmRyZ5pcm12CmMs4UhuN3h3Vr7Z7qRqHkxjNzUQpygPe25:anywhy.ca";
+  test("anywhy.ca", async () => {
+    const did = "did:webvh:QmU55yaLrkhCaTsmBgEqRiUTT6zGtxSZfvJS8vWQM4tgDb:anywhy.ca:webvh-05";
     const {did: resolvedDID, meta} = await resolveDID(did);
     expect(resolvedDID).toBe(did);
-    expect(meta.versionId).toBe("3-QmYKJo2xvahkwKFKzEybDMzSWGYcPVsX2eGYZTYqY678iK");
     expect(meta.nextKeyHashes.length).toBeGreaterThan(0);
     expect(meta.prerotation).toBe(true);
     expect(meta.portable).toBe(false);
+    expect(meta.witness?.witnesses.length).toBe(3);
+  })
+
+  test("anywhy.ca large", async () => {
+    const did = "did:webvh:QmahiuqDheWp6ZgRC66fsthiALqBFxvYQKk8uTQeqaBUQ2:anywhy.ca:webvh-05-large";
+    const {did: resolvedDID, meta} = await resolveDID(did);
+    expect(resolvedDID).toBe(did);
+    expect(meta.nextKeyHashes.length).toBeGreaterThan(0);
+    expect(meta.prerotation).toBe(true);
+    expect(meta.portable).toBe(false);
+    expect(meta.witness?.witnesses.length).toBe(3);
   })
 
   test.skip("demo.identifier.me", async () => {
@@ -20,9 +30,10 @@ describe("did:webvh interoperability tests", async () => {
     expect(meta.portable).toBe(false);
   })
 
-  test.skip("gist", async () => {
-    const did = "did:webvh:QmbnQXj7DhWFrmgjDPKZCybn8fkKW7Wze57SQHpwsSQ7NZ:gist.githubusercontent.com:brianorwhatever:9c4633d18eb644f7a47f93a802691626:raw";
+  test("gist", async () => {
+    const did = "did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:gist.githubusercontent.com:brianorwhatever:9c4633d18eb644f7a47f93a802691626:raw";
     const {did: resolvedDID, meta} = await resolveDID(did);
+
     expect(resolvedDID).toBe(did);
     expect(meta.prerotation).toBe(false);
     expect(meta.portable).toBe(false);

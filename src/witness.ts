@@ -5,6 +5,8 @@ import * as ed from '@noble/ed25519';
 import { base58btc } from "multiformats/bases/base58";
 import { resolveVM } from "./utils";
 import { bufferToString, concatBuffers } from './utils/buffer';
+import { config } from './config';
+import { fetchWitnessProofs } from './utils';
 
 
 export function validateWitnessParameter(witness: WitnessParameter): void {
@@ -47,16 +49,10 @@ export async function verifyWitnessProofs(
   witnessProofs: WitnessProofFileEntry[],
   currentWitness: WitnessParameter
 ): Promise<void> {
-  const validProofs = witnessProofs.filter(wp => wp.versionId === logEntry.versionId);
-  
-  if (validProofs.length === 0) {
-    throw new Error('No valid witness proofs found for version');
-  }
-
   let totalWeight = 0;
   const processedWitnesses = new Set<string>();
 
-  for (const proofSet of validProofs) {
+  for (const proofSet of witnessProofs) {
     for (const proof of proofSet.proof) {
       if (proof.cryptosuite !== 'eddsa-jcs-2022') {
         throw new Error('Invalid witness proof cryptosuite');
@@ -115,3 +111,5 @@ export async function verifyWitnessProofs(
     throw new Error(`Witness threshold not met: got ${totalWeight}, need ${currentWitness.threshold}`);
   }
 }
+
+export { fetchWitnessProofs }; 

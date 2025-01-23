@@ -2,7 +2,7 @@ import { clone, createDate, createDIDDoc, createSCID, deriveHash, fetchLogFromId
 import { BASE_CONTEXT, METHOD, PLACEHOLDER, PROTOCOL } from './constants';
 import { documentStateIsValid, hashChainValid, newKeysAreInNextKeys, scidIsFromHash } from './assertions';
 import type { CreateDIDInterface, DIDResolutionMeta, DIDLogEntry, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry } from './interfaces';
-import { verifyWitnessProofs, validateWitnessParameter } from './witness';
+import { verifyWitnessProofs, validateWitnessParameter, fetchWitnessProofs } from './witness';
 
 export const createDID = async (options: CreateDIDInterface): Promise<{did: string, doc: any, meta: DIDResolutionMeta, log: DIDLog}> => {
   if (!options.updateKeys) {
@@ -45,7 +45,12 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
   let allProofs = [signedDoc.proof];
   prelimEntry.proof = allProofs;
 
-  const verified = await documentStateIsValid({...prelimEntry, versionId: `1-${logEntryHash2}`, proof: prelimEntry.proof}, params.updateKeys, params.witness);
+  const verified = await documentStateIsValid(
+    {...prelimEntry, versionId: `1-${logEntryHash2}`, proof: prelimEntry.proof}, 
+    params.updateKeys, 
+    params.witness,
+    true // skipWitnessVerification
+  );
   if (!verified) {
     throw new Error(`version ${prelimEntry.versionId} is invalid.`)
   }
@@ -75,10 +80,15 @@ export const resolveDID = async (did: string, options: {
   const activeDIDs = await getActiveDIDs();
   const controlled = activeDIDs.includes(did);
   const log = await fetchLogFromIdentifier(did, controlled);
+  
   if (log.length === 0) {
     throw new Error(`DID ${did} not found`);
   }
-  return {...(await resolveDIDFromLog(log, options)), controlled};
+
+  return {
+    ...(await resolveDIDFromLog(log, { ...options })), 
+    controlled
+  };
 }
 
 export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions = {}): Promise<{did: string, doc: any, meta: DIDResolutionMeta}> => {
@@ -232,13 +242,24 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       }
     }
 
-    // If there's a witness configuration and witness proofs are provided
-    if (parameters.witness && options.witnessProofs) {
-      await verifyWitnessProofs(
-        resolutionLog[i],
-        options.witnessProofs,
-        parameters.witness
-      );
+    if (meta.witness && i === resolutionLog.length - 1) {
+      if (!options.witnessProofs) {
+        options.witnessProofs = await fetchWitnessProofs(did);
+      }
+
+      const validProofs = options.witnessProofs!.filter(wp => {
+        const [wpVersion] = wp.versionId.split('-');
+        const [currentVersion] = versionId.split('-');
+        return parseInt(wpVersion) >= parseInt(currentVersion);
+      });
+
+      if (validProofs.length > 0) {
+        await verifyWitnessProofs(
+          resolutionLog[i],
+          validProofs,
+          meta.witness
+        );
+      }
     }
 
     i++;

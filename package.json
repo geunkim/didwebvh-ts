@@ -7,11 +7,7 @@
   "browser": "dist/browser/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
-    "dist/cjs",
-    "dist/esm",
-    "dist/browser",
-    "dist/types",
-    "dist/cli"
+    "dist/**/*"
   ],
   "scripts": {
     "dev": "bun --watch --inspect-wait ./src/resolver.ts",

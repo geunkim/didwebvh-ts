@@ -1,5 +1,9 @@
 export default {
   branches: ['main'],
+  lastRelease: {
+    version: "1.0.0",
+    gitTag: "v1.0.0"
+  },
   plugins: [
     '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',

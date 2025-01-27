@@ -180,3 +180,4 @@ feat(api): remove deprecated endpoints
 
 BREAKING CHANGE: The following endpoints have been removed...
 ```
+

@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.0.1...v1.0.2) (2025-01-27)
+
+
+### Bug Fixes
+
+* bump version ([8194920](https://github.com/decentralized-identity/didwebvh-ts/commit/8194920f290a46857c8bb82a720b46fe6211baf1))
+
 # 1.0.0 (2025-01-27)
 
 

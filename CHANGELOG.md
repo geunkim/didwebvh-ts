@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.0.2...v1.0.3) (2025-02-10)
+
+
+### Bug Fixes
+
+* remove build crypto inject ([2d8c184](https://github.com/decentralized-identity/didwebvh-ts/commit/2d8c1846978131a56ff42eae45950c8163357374))
+
 ## [1.0.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.0.1...v1.0.2) (2025-01-27)
 
 

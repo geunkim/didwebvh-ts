@@ -66,31 +66,7 @@ const cjsConfig: BuildConfig = {
     '.js': 'js'
   },
   plugins: [
-    dynamicImportToCjsPlugin,
-    {
-      name: 'inject-crypto',
-      setup(build: any) {
-        build.onLoad({ filter: /\.[jt]s$/ }, async (args: any) => {
-          const contents = await Bun.file(args.path).text();
-          // Inject crypto setup at the top of the bundle
-          const cryptoSetup = `
-            const { webcrypto } = require('crypto');
-            if (!globalThis.crypto) {
-              globalThis.crypto = webcrypto;
-            }
-            if (!globalThis.etc) {
-              globalThis.etc = {
-                sha512Async: async (data) => {
-                  const buffer = await globalThis.crypto.subtle.digest('SHA-512', data);
-                  return new Uint8Array(buffer);
-                }
-              };
-            }
-          `;
-          return { contents: cryptoSetup + contents };
-        });
-      }
-    }
+    dynamicImportToCjsPlugin
   ]
 };
 

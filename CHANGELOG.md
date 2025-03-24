@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.0.3...v1.1.0) (2025-03-24)
+
+
+### Bug Fixes
+
+* check SCID in DID matches log ([2590811](https://github.com/decentralized-identity/didwebvh-ts/commit/259081152b25960dd54ce3201a60e1fc7d7822db))
+* remove multiformats dep ([974224b](https://github.com/decentralized-identity/didwebvh-ts/commit/974224b5b1df23701f049b9926e73af66a28e9ba))
+* remove server ([2689012](https://github.com/decentralized-identity/didwebvh-ts/commit/2689012f81a547a8ac205ab9310af88ccf6d13ba))
+
+
+### Features
+
+* add Elysia and Express resolver examples with Ed25519 verification ([ea0b5fa](https://github.com/decentralized-identity/didwebvh-ts/commit/ea0b5fa6c8bf4b447e29e0554063f07d762e7ad5))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

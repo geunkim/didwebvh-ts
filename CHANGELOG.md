@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.1.0...v2.0.0) (2025-03-24)
+
+
+### chore
+
+* Bump version ([377f423](https://github.com/decentralized-identity/didwebvh-ts/commit/377f4237ab5b79119d410d54f33b89b0307e007b))
+
+
+### BREAKING CHANGES
+
+* see previous
+
 # [1.1.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.0.3...v1.1.0) (2025-03-24)
 
 

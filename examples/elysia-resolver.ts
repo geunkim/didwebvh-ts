@@ -1,17 +1,54 @@
 import { Elysia } from 'elysia'
-import { config } from './config';
-import { resolveDID } from './method';
-import { DIDDoc } from './interfaces';
-import { getActiveDIDs } from './utils';
+import { resolveDID, AbstractCrypto } from 'didwebvh-ts';
+import type { DIDDoc, SigningInput, SigningOutput, Verifier } from 'didwebvh-ts/types';
+
+import { verify } from '@stablelib/ed25519';
+
+class ElysiaVerifier extends AbstractCrypto implements Verifier {
+  constructor(public readonly verificationMethod: {
+    id: string;
+    controller: string;
+    type: string;
+    publicKeyMultibase: string;
+    secretKeyMultibase: string;
+  }) {
+    super({ verificationMethod });
+  }
+
+  async sign(input: SigningInput): Promise<SigningOutput> {
+    throw new Error('Not implemented');
+  }
+
+  async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+    try {
+      return verify(publicKey, message, signature);
+    } catch (error) {
+      console.error('Ed25519 verification error:', error);
+      return false;
+    }
+  }
+}
+
+const createElysiaVerifier = () => {
+  return new ElysiaVerifier({
+    id: 'did:example:123#key-1',
+    controller: 'did:example:123',
+    type: 'Ed25519VerificationKey2020',
+    publicKeyMultibase: `z123`,
+    secretKeyMultibase: `z123`
+  });
+};
+
+const elysiaVerifier = createElysiaVerifier();
 
 const WELL_KNOWN_ALLOW_LIST = ['did.jsonl'];
 
-export const getFile = async ({
-  params: {path, file}, 
+const getFile = async ({
+  params: {path, file},
   isRemote = false,
   didDocument
 }: {
-  params: {path: string; file: string}, 
+  params: {path: string; file: string},
   isRemote?: boolean,
   didDocument?: DIDDoc
 }) => {
@@ -45,6 +82,7 @@ export const getFile = async ({
           serviceEndpoint = `${serviceEndpoint}/whois.vp`;
         }
       }
+      
       serviceEndpoint = serviceEndpoint.replace(/\/$/, '');
       const url = file === 'whois' ? serviceEndpoint : `${serviceEndpoint}/${file}`;
       
@@ -57,24 +95,28 @@ export const getFile = async ({
       }
       return response.text();
     }
+    
     if (file === 'whois') {
       file = 'whois.vp';
     }
-    const filePath = WELL_KNOWN_ALLOW_LIST.some(f => f === file) ? `./src/routes/.well-known/${file}` : path ? `./src/routes/${path}/${file}` : `./src/routes/${file}`
+    
+    const filePath = WELL_KNOWN_ALLOW_LIST.some(f => f === file) ? 
+      `./src/routes/.well-known/${file}` : 
+      path ? `./src/routes/${path}/${file}` : 
+      `./src/routes/${file}`;
+      
     return await Bun.file(filePath).text();
   } catch (e: unknown) {
     console.error(e);
-    return new Response(JSON.stringify({
-      error: 'Failed to resolve File',
-      details: e instanceof Error ? e.message : String(e)
-    }), {status: 404});
+    throw new Error(`Failed to resolve File: ${e instanceof Error ? e.message : String(e)}`);
   }
-}
+};
 
 const app = new Elysia()
-  .get('/health', 'ok')
-  .get('/resolve/:id', async ({ params: { id }, query }) => {
+  .get('/health', () => 'ok')
+  .get('/resolve/:id', async ({ params, query }) => {
     try {
+      const id = params.id;
       if (!id) {
         throw new Error('No id provided');
       }
@@ -82,21 +124,24 @@ const app = new Elysia()
       const [didPart, ...pathParts] = id.split('/');
       if (pathParts.length === 0) {
         const options = {
-          versionNumber: query.versionNumber ? parseInt(query.versionNumber as string) : undefined,
-          versionId: query.versionId as string,
-          versionTime: query.versionTime ? new Date(query.versionTime as string) : undefined,
-          verificationMethod: query.verificationMethod as string
+          versionNumber: query?.versionNumber ? parseInt(query.versionNumber as string) : undefined,
+          versionId: query?.versionId as string,
+          versionTime: query?.versionTime ? new Date(query.versionTime as string) : undefined,
+          verificationMethod: query?.verificationMethod as string,
+          verifier: elysiaVerifier
         };
+        
+        console.log(`Resolving DID ${didPart}`);
         return await resolveDID(didPart, options);
       }
       
-      const {did, doc, controlled} = await resolveDID(didPart);
+      const {did, doc, controlled} = await resolveDID(didPart, { verifier: elysiaVerifier });
       
       const didParts = did.split(':');
       const domain = didParts[didParts.length - 1];
       const fileIdentifier = didParts[didParts.length - 2];
       
-      return await getFile({
+      const fileContent = await getFile({
         params: {
           path: !controlled ? domain : fileIdentifier,
           file: pathParts.join('/')
@@ -104,49 +149,15 @@ const app = new Elysia()
         isRemote: !controlled,
         didDocument: doc
       });
+      
+      return fileContent;
     } catch (error: unknown) {
-      console.error('Error resolving identifier:', error);
-      return new Response(JSON.stringify({
+      return {
         error: 'Resolution failed',
         details: error instanceof Error ? error.message : String(error)
-      }), {status: 400});
+      };
     }
   })
-  .get('/resolve/:id/*', async ({ params }) => {
-    const pathParts = params['*'].split('/');
-    return await getFile({
-      params: {
-        path: pathParts.slice(0, -1).join('/'),
-        file: pathParts[pathParts.length - 1]
-      },
-      isRemote: false
-    });
-  })
-  .get('/.well-known/*', async ({ params }) => {
-    const file = params['*'];
-    return await getFile({
-      params: {
-        path: '.well-known',
-        file
-      },
-      isRemote: false
-    });
-  })
+  .listen(3010);
 
-const port = config.getEnvValue('PORT') || 8000;
-
-// Log active DIDs when server starts
-app.onStart(async () => {
-  console.log('\n=== Active DIDs ===');
-  const activeDIDs = await getActiveDIDs();
-  
-  if (activeDIDs.length === 0) {
-    console.log('No active DIDs found');
-  } else {
-    activeDIDs.forEach(did => console.log(did));
-  }
-  console.log('=================\n');
-});
-
-console.log(`🔍 Resolver is running at http://localhost:${port}`);
-app.listen(port);
+console.log(`🦊 Elysia resolver is running at ${app.server?.hostname}:${app.server?.port}`);

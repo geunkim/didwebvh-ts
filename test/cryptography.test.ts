@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { AbstractSigner, createDocumentSigner } from "../src/cryptography";
+import { AbstractCrypto, createDocumentSigner } from "../src/cryptography";
 import { SigningInput, SigningOutput, SignerOptions, Verifier } from "../src/interfaces";
 import { documentStateIsValid } from "../src/assertions";
 import { verifyWitnessProofs } from "../src/witness";
@@ -10,7 +10,7 @@ import { multibaseEncode } from "../src/utils/multiformats";
 process.env.IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID = 'true';
 
 // Mock crypto implementation for testing
-class MockCryptoImplementation extends AbstractSigner implements Verifier {
+class MockCryptoImplementation extends AbstractCrypto implements Verifier {
   private mockSignature = new Uint8Array([1, 2, 3, 4]);
   private shouldVerifySucceed: boolean;
 

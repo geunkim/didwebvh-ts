@@ -1,4 +1,4 @@
 export { resolveDID, createDID, updateDID, deactivateDID } from './method';
-export { createDocumentSigner, prepareDataForSigning, createProof, createSigner, AbstractSigner } from './cryptography';
-export type { Signer, SigningInput, SigningOutput, VerificationMethod, SignerOptions, Verifier } from './interfaces';
-export { multibaseEncode, multibaseDecode, MultihashAlgorithm } from './utils/multiformats';
+export { createDocumentSigner, prepareDataForSigning, createProof, createSigner, AbstractCrypto } from './cryptography';
+export * from './interfaces';
+export { multibaseEncode, multibaseDecode, MultibaseEncoding } from './utils/multiformats';

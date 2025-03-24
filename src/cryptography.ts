@@ -35,7 +35,7 @@ export const prepareDataForSigning = async (document: any, proof: any): Promise<
  * Abstract base class for signers
  * Users should extend this class to implement their own signing logic
  */
-export abstract class AbstractSigner implements Signer {
+export abstract class AbstractCrypto implements Signer {
   protected verificationMethod: VerificationMethod;
   protected useStaticId: boolean;
 

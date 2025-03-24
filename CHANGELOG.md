@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New `Signer` interface for implementing custom signing logic
-- New `AbstractSigner` class for easier signer implementation
+- New `AbstractCrypto` class for easier signer implementation
 - New `SigningInput` and `SigningOutput` interfaces
 - New `SignerOptions` interface for configuring signers
 - New `createDocumentSigner` function for creating document signers
 - New example implementations in `src/examples`
-  - `custom-signer.ts`: Example using `AbstractSigner`
-  - `hsm-signer.ts`: Example implementing `Signer` directly for HSM/KMS integration
+  - `elysia-signer.ts`: Example using `AbstractCrypto`
+  - `express-signer.ts`: Example implementing `Verifier` directly for HSM/KMS integration
 
 ### Changed
 - Removed built-in cryptographic implementations

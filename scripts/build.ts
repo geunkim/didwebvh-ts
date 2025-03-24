@@ -107,6 +107,9 @@ function createDistPackageJson() {
         "import": "./esm/index.js",
         "require": "./cjs/index.cjs",
         "types": "./types/index.d.ts"
+      },
+      "./types": {
+        "types": "./types/types.d.ts"
       }
     },
     dependencies: pkg.dependencies

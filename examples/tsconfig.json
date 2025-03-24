@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "paths": {
+      "didwebvh-ts": ["../src"],
+      "didwebvh-ts/types": ["../src/types"]
+    },
+    "rootDir": "../"
+  },
+  "include": ["../**/*.ts"],
+  "exclude": ["node_modules"]
+} 

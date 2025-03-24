@@ -138,7 +138,7 @@ For complete examples, see the [resolver examples](./examples/resolvers/) direct
 - `createSigner(options: SignerOptions): Signer`
   Creates a signer for signing data.
 
-- `AbstractSigner`
+- `AbstractCrypto`
   An abstract class for implementing custom signers.
 
 ## License

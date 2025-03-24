@@ -1,8 +1,8 @@
 import { deriveHash } from '../src/utils';
 import type { DIDLogEntry, DIDLog } from '../src/interfaces';
-import { AbstractSigner, createDocumentSigner } from "../src/cryptography";
+import { AbstractCrypto } from "../src/cryptography";
 import { SigningInput, SigningOutput, SignerOptions, Verifier, VerificationMethod, Signer } from "../src/interfaces";
-import * as crypto from '@stablelib/ed25519'; // Using stablelib for test implementation
+import * as crypto from '@stablelib/ed25519';
 import { prepareDataForSigning } from '../src/cryptography';
 import { multibaseDecode, multibaseEncode, MultibaseEncoding } from '../src/utils/multiformats';
 
@@ -21,7 +21,7 @@ export function createMockDIDLog(entries: Partial<DIDLogEntry>[]): DIDLog {
 }
 
 // Test crypto implementation
-export class TestCryptoImplementation extends AbstractSigner implements Verifier {
+export class TestCryptoImplementation extends AbstractCrypto implements Verifier {
   private keyPair: { publicKey: Uint8Array; secretKey: Uint8Array };
 
   constructor(options: SignerOptions) {

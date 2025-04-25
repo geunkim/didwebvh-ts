@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.0...v2.0.1) (2025-04-25)
+
+
+### Bug Fixes
+
+* export resolveDIDFromLog ([eace3c8](https://github.com/decentralized-identity/didwebvh-ts/commit/eace3c82e2a72fe3e38e2ae7aa69b6e47f113d70))
+
 # [2.0.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v1.1.0...v2.0.0) (2025-03-24)
 
 

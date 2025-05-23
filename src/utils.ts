@@ -108,8 +108,9 @@ export const getBaseUrl = (id: string) => {
 
 export const getFileUrl = (id: string) => {
   const baseUrl = getBaseUrl(id);
-  const url = new URL(baseUrl);
-  if (url.pathname !== '/') {
+  const domainEndIndex = baseUrl.indexOf('/', baseUrl.indexOf('://') + 3);
+  
+  if (domainEndIndex !== -1) {
     return `${baseUrl}/did.jsonl`;
   }
   return `${baseUrl}/.well-known/did.jsonl`;

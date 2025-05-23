@@ -2,7 +2,7 @@ import { Elysia } from 'elysia'
 import { resolveDID, AbstractCrypto } from 'didwebvh-ts';
 import type { DIDDoc, SigningInput, SigningOutput, Verifier } from 'didwebvh-ts/types';
 
-import { verify } from '@stablelib/ed25519';
+import { verify as ed25519Verify } from '@stablelib/ed25519';
 
 class ElysiaVerifier extends AbstractCrypto implements Verifier {
   constructor(public readonly verificationMethod: {
@@ -21,7 +21,7 @@ class ElysiaVerifier extends AbstractCrypto implements Verifier {
 
   async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
     try {
-      return verify(publicKey, message, signature);
+      return ed25519Verify(publicKey, message, signature);
     } catch (error) {
       console.error('Ed25519 verification error:', error);
       return false;

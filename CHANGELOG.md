@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.1...v2.0.2) (2025-05-23)
+
+
+### Bug Fixes
+
+* update getFileUrl to use domain end index for URL construction ([b4aa3af](https://github.com/decentralized-identity/didwebvh-ts/commit/b4aa3af9e96a5ebae0a20fafab711f6ff261809f))
+
 ## [2.0.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.0...v2.0.1) (2025-04-25)
 
 

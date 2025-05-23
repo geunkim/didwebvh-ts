@@ -33,6 +33,7 @@
     "semantic-release": "^22.0.0"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
     "json-canonicalize": "^1.0.6"
   },
   "bin": {

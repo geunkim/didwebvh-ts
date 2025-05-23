@@ -1,10 +1,5 @@
 /// <reference lib="dom" />
-import { config } from '../config';
-
-function stringToUint8Array(str: string): Uint8Array {
-  const encoder = new TextEncoder();
-  return encoder.encode(str);
-}
+import { sha256 } from '@noble/hashes/sha2';
 
 function arrayBufferToHex(buffer: ArrayBufferLike | Uint8Array): string {
   const view = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -14,14 +9,7 @@ function arrayBufferToHex(buffer: ArrayBufferLike | Uint8Array): string {
 }
 
 export async function createHash(data: string): Promise<Uint8Array> {
-  if (config.isBrowser) {
-    const msgUint8 = stringToUint8Array(data);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-    return new Uint8Array(hashBuffer);
-  } else {
-    const { createHash } = await import('node:crypto');
-    return new Uint8Array(createHash('sha256').update(data).digest());
-  }
+  return sha256(data);
 }
 
 export async function createHashHex(data: string): Promise<string> {

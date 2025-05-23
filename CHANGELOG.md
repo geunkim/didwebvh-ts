@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.2...v2.1.0) (2025-05-23)
+
+
+### Features
+
+* add @noble/hashes dependency and refactor createHash function to use it ([4527738](https://github.com/decentralized-identity/didwebvh-ts/commit/45277380d9ea9bafd6d581e9fb123002f6be3795))
+
 ## [2.0.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.1...v2.0.2) (2025-05-23)
 
 

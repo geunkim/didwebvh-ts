@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-import { toASCII } from 'node:punycode';
 import { canonicalize } from 'json-canonicalize';
 import { config } from './config';
 import { resolveDIDFromLog } from './method';
@@ -8,7 +6,28 @@ import { createBuffer, bufferToString } from './utils/buffer';
 import { createMultihash, encodeBase58Btc, MultihashAlgorithm } from './utils/multiformats';
 import { createHash } from './utils/crypto';
 
+let fsModule: typeof import('fs') | null = null;
+if (!config.isBrowser) {
+  fsModule = await import('node:fs');
+}
+const getFS = () => {
+  if (!fsModule) {
+    throw new Error('Filesystem access is not available in this environment');
+  }
+  return fsModule;
+};
+
+const toASCII = (domain: string): string => {
+  try {
+    const scheme = domain.includes('localhost') ? 'http' : 'https';
+    return new URL(`${scheme}://${domain}`).hostname;
+  } catch {
+    return domain;
+  }
+};
+
 export const readLogFromDisk = (path: string): DIDLog => {
+  const fs = getFS();
   return readLogFromString(fs.readFileSync(path, 'utf8'));
 }
 
@@ -17,6 +36,7 @@ export const readLogFromString = (str: string): DIDLog => {
 }
 
 export const writeLogToDisk = (path: string, log: DIDLog) => {
+  const fs = getFS();
   try {
     const dir = path.substring(0, path.lastIndexOf('/'));
     if (!fs.existsSync(dir)) {
@@ -45,6 +65,7 @@ export const writeVerificationMethodToEnv = (verificationMethod: VerificationMet
     secretKeyMultibase: verificationMethod.secretKeyMultibase || ''
   };
 
+  const fs = getFS();
   try {
     let envContent = '';
     let existingData: any[] = [];
@@ -132,9 +153,17 @@ export async function fetchLogFromIdentifier(identifier: string, controlled: boo
       const didParts = identifier.split(':');
       const fileIdentifier = didParts.slice(4).join(':');
       const logPath = `./src/routes/${fileIdentifier || '.well-known'}/did.jsonl`;
-      
+
       try {
-        const text = (await Bun.file(logPath).text()).trim();
+        let text: string;
+        if (typeof Bun !== 'undefined' && Bun.file) {
+          text = (await Bun.file(logPath).text()).trim();
+        } else if (!config.isBrowser) {
+          const fs = getFS();
+          text = fs.readFileSync(logPath, 'utf8').trim();
+        } else {
+          throw new Error('Local log retrieval not supported in browser');
+        }
         if (!text) {
           return [];
         }

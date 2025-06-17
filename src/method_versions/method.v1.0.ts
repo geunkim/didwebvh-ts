@@ -127,7 +127,6 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       meta.prerotation = meta.nextKeyHashes.length > 0;
       meta.witness = parameters.witness || meta.witness;
       meta.watchers = parameters.watchers ?? null;
-      meta.nextKeyHashes = parameters.nextKeyHashes ?? [];
       const logEntry = {
         versionId: PLACEHOLDER,
         versionTime: meta.created,

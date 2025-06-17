@@ -4,7 +4,7 @@
 
 ## Summary
 
-The `didwebvh-ts` implementation of the [`did:webvh`]('https://identity.foundation/didwebvh/') specification aims to be compatible with the `did:webvh` v0.5 specification.
+The `didwebvh-ts` implementation of the [`did:webvh`]('https://identity.foundation/didwebvh/') specification aims to be compatible with the `did:webvh` v1.0 specification.
 
 ## Examples
 
@@ -68,6 +68,7 @@ The following commands are defined in the `package.json` file:
    ```bash
    bun run cli
    ```
+   The CLI accepts a `--watcher` option during create and update operations to specify one or more watcher URLs.
 
 8. `build`: Build the package.
    ```bash

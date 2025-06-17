@@ -33,6 +33,7 @@ export interface DIDResolutionMeta {
   nextKeyHashes: string[];
   deactivated: boolean;
   witness?: WitnessParameter | undefined | null;
+  watchers?: string[] | null;
 }
 
 export interface DIDDoc {
@@ -90,6 +91,7 @@ export interface DIDLogEntry {
     nextKeyHashes?: string[];
     portable?: boolean;
     witness?: WitnessParameter | null;
+    watchers?: string[] | null;
     deactivated?: boolean;
   };
   state: DIDDoc;
@@ -115,6 +117,7 @@ export interface CreateDIDInterface {
   portable?: boolean;
   nextKeyHashes?: string[];
   witness?: WitnessParameter | null;
+  watchers?: string[] | null;
   created?: string;
   verifier?: Verifier;
   authentication?: string[];
@@ -139,6 +142,7 @@ export interface UpdateDIDInterface {
   portable?: boolean;
   nextKeyHashes?: string[];
   witness?: WitnessParameter | null;
+  watchers?: string[] | null;
   verifier?: Verifier;
   authentication?: string[];
   assertionMethod?: string[];

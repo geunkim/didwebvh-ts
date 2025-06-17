@@ -28,6 +28,7 @@ Options:
   --portable                Make the DID portable (optional for create)
   --witness [witness]       Add a witness (can be used multiple times)
   --witness-threshold [n]   Set witness threshold (optional, defaults to number of witnesses)
+  --watcher [url]           Add a watcher URL (can be used multiple times)
   --service [service]       Add a service (format: type,endpoint) (can be used multiple times)
   --add-vm [type]           Add a verification method (type can be authentication, assertionMethod, keyAgreement, capabilityInvocation, capabilityDelegation)
   --also-known-as [alias]   Add an alsoKnownAs alias (can be used multiple times)
@@ -99,6 +100,7 @@ export async function handleCreate(args: string[]) {
   const portable = options['portable'] !== undefined;
   const nextKeyHashes = options['next-key-hash'] as string[] | undefined;
   const witnesses = options['witness'] as string[] | undefined;
+  const watchers = options['watcher'] as string[] | undefined;
   const witnessThreshold = options['witness-threshold'] ? parseInt(options['witness-threshold'] as string) : witnesses?.length ?? 0;
 
   if (!domain) {
@@ -119,6 +121,7 @@ export async function handleCreate(args: string[]) {
         witnesses: witnesses.map(witness => ({id: witness, weight: 1})),
         threshold: witnessThreshold
       } : undefined,
+      watchers: watchers ?? undefined,
       nextKeyHashes,
     });
 
@@ -201,6 +204,7 @@ export async function handleUpdate(args: string[]) {
   const addVm = options['add-vm'] as string[] | undefined;
   const alsoKnownAs = options['also-known-as'] as string[] | undefined;
   const updateKey = options['update-key'] as string | undefined;
+  const watchers = options['watcher'] as string[] | undefined;
 
   if (!logFile) {
     console.error('Log file is required for update command');
@@ -274,6 +278,7 @@ export async function handleUpdate(args: string[]) {
         witnesses: witnesses.map(witness => ({id: witness, weight: 1})),
         threshold: witnessThreshold ?? witnesses.length
       } : undefined,
+      watchers: watchers ?? undefined,
       services,
       alsoKnownAs
     });
@@ -353,7 +358,7 @@ function parseOptions(args: string[]): Record<string, string | string[] | undefi
     if (args[i].startsWith('--')) {
       const key = args[i].slice(2);
       if (i + 1 < args.length && !args[i + 1].startsWith('--')) {
-        if (key === 'witness' || key === 'service' || key === 'also-known-as' || key === 'next-key-hash') {
+        if (key === 'witness' || key === 'service' || key === 'also-known-as' || key === 'next-key-hash' || key === 'watcher') {
           options[key] = options[key] || [];
           (options[key] as string[]).push(args[++i]);
         } else if (key === 'add-vm') {

@@ -21,27 +21,25 @@ describe("Witness Implementation Tests", async () => {
     testImplementation = new TestCryptoImplementation({ verificationMethod: authKey });
   });
 
-  test("Create DID with weighted witness threshold", async () => {
+  test("Create DID with witness threshold", async () => {
     initialDID = await createDID({
       domain: 'example.com',
       signer: createTestSigner(authKey),
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods: [authKey],
       witness: {
-        threshold: 3,
+        threshold: 2,
         witnesses: [
-          { id: `did:key:${witness1.publicKeyMultibase}`, weight: 2 },
-          { id: `did:key:${witness2.publicKeyMultibase}`, weight: 1 },
-          { id: `did:key:${witness3.publicKeyMultibase}`, weight: 1 }
+          { id: `did:key:${witness1.publicKeyMultibase}` },
+          { id: `did:key:${witness2.publicKeyMultibase}` }
         ]
       },
       verifier: testImplementation
     });
 
     const resolved = await resolveDIDFromLog(initialDID.log, { verifier: testImplementation });
-    expect(resolved.meta?.witness?.threshold).toBe(3);
-    expect(resolved.meta?.witness?.witnesses).toHaveLength(3);
-    expect(resolved.meta?.witness?.witnesses?.[0].weight).toBe(2);
+    expect(resolved.meta?.witness?.threshold).toBe(2);
+    expect(resolved.meta?.witness?.witnesses).toHaveLength(2);
   });
 
   test("Update DID with witness proofs meeting threshold", async () => {
@@ -74,7 +72,7 @@ describe("Witness Implementation Tests", async () => {
     } as any);
 
     const resolved = await resolveDIDFromLog(updatedDID.log, { verifier: testImplementation });
-    expect(resolved.meta?.witness?.threshold).toBe(3);
+    expect(resolved.meta?.witness?.threshold).toBe(2);
   });
 
   test("Replace witness list with new witnesses", async () => {
@@ -88,7 +86,7 @@ describe("Witness Implementation Tests", async () => {
       witness: {
         threshold: 1,
         witnesses: [
-          { id: `did:key:${newWitness.publicKeyMultibase}`, weight: 1 }
+          { id: `did:key:${newWitness.publicKeyMultibase}` }
         ]
       },
       verifier: testImplementation

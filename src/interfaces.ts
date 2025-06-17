@@ -63,7 +63,6 @@ export interface VerificationMethod {
 
 export interface WitnessEntry {
   id: string;  // did:key DID
-  weight: number;
 }
 
 export interface WitnessParameter {

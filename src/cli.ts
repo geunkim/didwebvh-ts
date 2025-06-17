@@ -118,7 +118,7 @@ export async function handleCreate(args: string[]) {
       verificationMethods: [authKey],
       portable,
       witness: witnesses?.length ? {
-        witnesses: witnesses.map(witness => ({id: witness, weight: 1})),
+        witnesses: witnesses.map(witness => ({id: witness})),
         threshold: witnessThreshold
       } : undefined,
       watchers: watchers ?? undefined,
@@ -275,7 +275,7 @@ export async function handleUpdate(args: string[]) {
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods,
       witness: witnesses?.length ? {
-        witnesses: witnesses.map(witness => ({id: witness, weight: 1})),
+        witnesses: witnesses.map(witness => ({id: witness})),
         threshold: witnessThreshold ?? witnesses.length
       } : undefined,
       watchers: watchers ?? undefined,

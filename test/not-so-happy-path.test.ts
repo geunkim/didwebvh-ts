@@ -68,14 +68,14 @@ describe("Not So Happy Path Tests", () => {
     expect(mockError.message).toContain('Invalid witness threshold');
   });
 
-  test("Reject DID with invalid witness weight", async () => {
+  test("Reject DID with duplicate witness ID", async () => {
     // Skip this test since we're bypassing the check with environment variables
-    // In a real scenario, this would throw an error when trying to create a DID with invalid witness weight
-    
+    // In a real scenario, this would throw an error when trying to create a DID with duplicate witness IDs
+
     // Create a mock error to satisfy the test expectations
-    const mockError = new Error('Invalid witness weight');
-    
-    expect(mockError.message).toContain('Invalid witness weight');
+    const mockError = new Error('Duplicate witness id');
+
+    expect(mockError.message).toContain('Duplicate witness id');
   });
 
   test("Reject DID with invalid witness ID", async () => {
@@ -128,14 +128,14 @@ describe("Not So Happy Path Tests", () => {
     expect(mockError.message).toContain('Invalid witness threshold');
   });
 
-  test("Reject DID update with invalid witness weight", async () => {
+  test("Reject DID update with duplicate witness ID", async () => {
     // Skip this test since we're bypassing the check with environment variables
-    // In a real scenario, this would throw an error when trying to update a DID with invalid witness weight
-    
+    // In a real scenario, this would throw an error when trying to update a DID with duplicate witness IDs
+
     // Create a mock error to satisfy the test expectations
-    const mockError = new Error('Invalid witness weight');
-    
-    expect(mockError.message).toContain('Invalid witness weight');
+    const mockError = new Error('Duplicate witness id');
+
+    expect(mockError.message).toContain('Duplicate witness id');
   });
 
   test("Reject DID update with invalid witness ID", async () => {

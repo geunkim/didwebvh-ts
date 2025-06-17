@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { toASCII } from 'node:punycode';
 import { canonicalize } from 'json-canonicalize';
 import { config } from './config';
 import { resolveDIDFromLog } from './method';
@@ -98,12 +99,22 @@ export const getBaseUrl = (id: string) => {
   if (!id.startsWith('did:webvh:') || parts.length < 4) {
     throw new Error(`${id} is not a valid did:webvh identifier`);
   }
-  
-  let domain = parts.slice(3).join('/');
-  domain = domain.replace(/%2F/g, '/');
-  domain = domain.replace(/%3A/g, ':');
-  const protocol = domain.includes('localhost') ? 'http' : 'https';
-  return `${protocol}://${domain}`;
+
+  let remainder = decodeURIComponent(parts.slice(3).join('/'));
+  const protocol = remainder.includes('localhost') ? 'http' : 'https';
+
+  const [hostPart, ...pathParts] = remainder.split('/');
+  let [host, port] = decodeURIComponent(hostPart).split(':');
+
+  host = host
+    .split('.')
+    .map(label => toASCII(label.normalize('NFC')))
+    .join('.');
+
+  const normalizedHost = port ? `${host}:${port}` : host;
+  const path = pathParts.join('/');
+
+  return `${protocol}://${normalizedHost}${path ? '/' + path : ''}`;
 }
 
 export const getFileUrl = (id: string) => {

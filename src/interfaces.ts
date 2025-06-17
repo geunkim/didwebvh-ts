@@ -21,19 +21,27 @@ export interface SignerOptions {
   useStaticId?: boolean;
 }
 
+export interface ProblemDetails {
+  type: string;
+  title: string;
+  detail: string;
+}
+
 export interface DIDResolutionMeta {
-  versionId: string;
-  created: string;
-  updated: string;
+  versionId?: string;
+  created?: string;
+  updated?: string;
   previousLogEntryHash?: string;
-  updateKeys: string[];
-  scid: string;
-  prerotation: boolean;
-  portable: boolean;
-  nextKeyHashes: string[];
-  deactivated: boolean;
+  updateKeys?: string[];
+  scid?: string;
+  prerotation?: boolean;
+  portable?: boolean;
+  nextKeyHashes?: string[];
+  deactivated?: boolean;
   witness?: WitnessParameter | undefined | null;
   watchers?: string[] | null;
+  error?: 'notFound' | 'invalidDid';
+  problemDetails?: ProblemDetails;
 }
 
 export interface DIDDoc {

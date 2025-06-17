@@ -35,14 +35,39 @@ export const createDID = async (options: CreateDIDInterface) => {
 export const resolveDID = async (did: string, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[] } = {}) => {
   const activeDIDs = await getActiveDIDs();
   const controlled = activeDIDs.includes(did);
-  const log = await fetchLogFromIdentifier(did, controlled);
-  const version = getWebvhVersionFromLog(log);
-  if (version === '0.5') {
-    const result = await v0_5.resolveDIDFromLog(log, options);
+  try {
+    const log = await fetchLogFromIdentifier(did, controlled);
+    const version = getWebvhVersionFromLog(log);
+    if (version === '0.5') {
+      const result = await v0_5.resolveDIDFromLog(log, options);
+      return { ...result, controlled };
+    }
+    const result = await v1.resolveDIDFromLog(log, options);
     return { ...result, controlled };
+  } catch (e: any) {
+    let errorType: 'notFound' | 'invalidDid' = 'invalidDid';
+    const message = e instanceof Error ? e.message : String(e);
+    if (/not found/i.test(message) || /404/.test(message)) {
+      errorType = 'notFound';
+    }
+    return {
+      did,
+      doc: null,
+      meta: {
+        error: errorType,
+        problemDetails: {
+          type: errorType === 'notFound'
+            ? 'https://w3id.org/security#NOT_FOUND'
+            : 'https://w3id.org/security#INVALID_CONTROLLED_IDENTIFIER_DOCUMENT_ID',
+          title: errorType === 'notFound'
+            ? 'The DID Log or resource was not found.'
+            : 'The resolved DID is invalid.',
+          detail: message
+        }
+      },
+      controlled
+    };
   }
-  const result = await v1.resolveDIDFromLog(log, options);
-  return { ...result, controlled };
 };
 
 export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[] } = {}) => {

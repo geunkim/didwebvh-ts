@@ -1,3 +1,22 @@
+# [2.2.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.1.0...v2.2.0) (2025-06-18)
+
+
+### Bug Fixes
+
+* improve test script logging and cleanup ([4df9663](https://github.com/decentralized-identity/didwebvh-ts/commit/4df9663d7a702c9a586cb1dbebb380e39ca85707))
+
+
+### Features
+
+* add watcher support to DID creation and updates ([8d206bd](https://github.com/decentralized-identity/didwebvh-ts/commit/8d206bdf1452d435f2c370e1753c22799f5dc8ec))
+* enhance DID resolution error handling and add ProblemDetails interface ([b331c46](https://github.com/decentralized-identity/didwebvh-ts/commit/b331c4630d35005d66bea80bb2904c5bfe1ee415))
+* enhance error handling and status code mapping in DID resolution ([849d0c6](https://github.com/decentralized-identity/didwebvh-ts/commit/849d0c60ef04efb17c66e155bc3072273a166ac2))
+* enhance internationalized domain handling in utils ([f19f831](https://github.com/decentralized-identity/didwebvh-ts/commit/f19f831e4463071e06c50b6966ae4a6769fc0ce3))
+* enhance test logging functionality in DID operations ([8d66bcc](https://github.com/decentralized-identity/didwebvh-ts/commit/8d66bcce45a287f1e953bcff662d92c99615d10c))
+* implement domain encoding in DID creation ([4369f70](https://github.com/decentralized-identity/didwebvh-ts/commit/4369f706a83134b9b1cfabcc5e6f802262863e26))
+* improve filesystem access and domain handling in utils ([f6a6154](https://github.com/decentralized-identity/didwebvh-ts/commit/f6a61548543f130a02e89008c880ceba307f28b6))
+* update examples and scripts for improved clarity and functionality ([4ff2465](https://github.com/decentralized-identity/didwebvh-ts/commit/4ff24652887d1c8c03f12af6ab4814051835b7f5))
+
 # [2.1.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.0.2...v2.1.0) (2025-05-23)
 
 

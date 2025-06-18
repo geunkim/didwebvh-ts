@@ -10,9 +10,11 @@ The `didwebvh-ts` implementation of the [`did:webvh`]('https://identity.foundati
 
 The `examples` directory contains sample code demonstrating how to use the library:
 
-- **Crypto Examples**: The `examples/crypto` directory shows how to use the injectable signer and verifier functionality in the `didwebvh-ts` library. These examples demonstrate how to implement custom cryptographic operations, integrate with external key management systems (KMS), use hardware security modules (HSM), and create your own signing and verification logic. See the [crypto examples README](./examples/crypto/README.md) for more information.
-
-- **Resolver Examples**: The `examples/resolvers` directory contains examples of how to implement a DID resolver using the `didwebvh-ts` library with different web frameworks (Elysia, Express). See the [resolver examples README](./examples/resolvers/README.md) for more information.
+- **Resolver Examples**: The `examples` directory includes two resolver implementations:
+  - `elysia-resolver.ts`: (`bun run example:resolver`) A resolver built with the Elysia web framework
+  - `express-resolver.ts`: A resolver built with Express.js
+  Both examples demonstrate how to implement a DID resolver with different web frameworks. See the [Examples README](./examples/README.md) for more information.
+- **Signer Example**: The `examples/signer.ts` (`bun run example:signer`) file demonstrates how to implement a custom signer using `AbstractCrypto`.
 
 ## Prerequisites
 
@@ -36,13 +38,13 @@ The following commands are defined in the `package.json` file:
    ```bash
    bun run dev
    ```
-   This command runs: `bun --watch --inspect-wait ./examples/resolvers/elysia/resolver.ts`
+  This command runs: `bun --watch --inspect-wait ./examples/elysia-resolver.ts`
 
 2. `server`: Run the Elysia resolver example in watch mode for development.
    ```bash
    bun run server
    ```
-   This command runs: `bun --watch ./examples/resolvers/elysia/resolver.ts`
+  This command runs: `bun --watch ./examples/elysia-resolver.ts`
 
 3. `test`: Run all tests.
    ```bash
@@ -107,7 +109,7 @@ The `didwebvh-ts` library provides the core functionality for resolving DIDs, bu
 
 3. Implement file retrieval logic for DID documents and associated resources.
 
-For complete examples, see the [resolver examples](./examples/resolvers/) directory.
+For complete examples, see the [examples](./examples/) directory.
 
 ## API Reference
 

@@ -2,6 +2,7 @@ import { canonicalize } from 'json-canonicalize';
 import { config } from './config';
 import { resolveDIDFromLog } from './method';
 import type { CreateDIDInterface, DIDDoc, DIDLog, VerificationMethod, WitnessProofFileEntry } from './interfaces';
+import { BASE_CONTEXT } from './constants';
 import { createBuffer, bufferToString } from './utils/buffer';
 import { createMultihash, encodeBase58Btc, MultihashAlgorithm } from './utils/multiformats';
 import { createHash } from './utils/crypto';
@@ -216,13 +217,10 @@ export const deriveNextKeyHash = async (input: string): Promise<string> => {
 export const createDIDDoc = async (options: CreateDIDInterface): Promise<{doc: DIDDoc}> => {
   const {controller} = options;
   const all = normalizeVMs(options.verificationMethods, controller);
-  
+
   // Create the base document
   const doc: DIDDoc = {
-    "@context": [
-      "https://www.w3.org/ns/did/v1",
-      "https://w3id.org/security/multikey/v1"
-    ],
+    "@context": options.context || BASE_CONTEXT,
     id: controller,
     controller,
   };

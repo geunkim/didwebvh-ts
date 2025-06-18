@@ -21,6 +21,12 @@ export interface SignerOptions {
   useStaticId?: boolean;
 }
 
+export interface ProblemDetails {
+  type: string;
+  title: string;
+  detail: string;
+}
+
 export interface DIDResolutionMeta {
   versionId: string;
   created: string;
@@ -33,6 +39,10 @@ export interface DIDResolutionMeta {
   nextKeyHashes: string[];
   deactivated: boolean;
   witness?: WitnessParameter | undefined | null;
+  watchers?: string[] | null;
+  error?: 'NOT_FOUND' | 'INVALID_DID' | 'INVALID_DID_URL' | 'INVALID_OPTIONS' | 'REPRESENTATION_NOT_SUPPORTED' | 'METHOD_NOT_SUPPORTED' | 'UNSUPPORTED_PUBLIC_KEY_TYPE' | 'INVALID_DID_DOCUMENT' | 'INVALID_PUBLIC_KEY' | 'INVALID_PUBLIC_KEY_LENGTH' | 'INVALID_PUBLIC_KEY_TYPE' | 'INTERNAL_ERROR';
+  problemDetails?: ProblemDetails;
+  latestVersionId?: string;
 }
 
 export interface DIDDoc {
@@ -62,7 +72,6 @@ export interface VerificationMethod {
 
 export interface WitnessEntry {
   id: string;  // did:key DID
-  weight: number;
 }
 
 export interface WitnessParameter {
@@ -90,6 +99,7 @@ export interface DIDLogEntry {
     nextKeyHashes?: string[];
     portable?: boolean;
     witness?: WitnessParameter | null;
+    watchers?: string[] | null;
     deactivated?: boolean;
   };
   state: DIDDoc;
@@ -115,6 +125,7 @@ export interface CreateDIDInterface {
   portable?: boolean;
   nextKeyHashes?: string[];
   witness?: WitnessParameter | null;
+  watchers?: string[] | null;
   created?: string;
   verifier?: Verifier;
   authentication?: string[];
@@ -139,6 +150,7 @@ export interface UpdateDIDInterface {
   portable?: boolean;
   nextKeyHashes?: string[];
   witness?: WitnessParameter | null;
+  watchers?: string[] | null;
   verifier?: Verifier;
   authentication?: string[];
   assertionMethod?: string[];
@@ -157,6 +169,7 @@ export interface ResolutionOptions {
   versionTime?: Date;
   verificationMethod?: string;
   verifier?: Verifier;
+  scid?: string;
 }
 
 export interface WitnessProofFileEntry {

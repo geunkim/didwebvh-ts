@@ -132,8 +132,7 @@ describe("Injectable Cryptography Tests", () => {
     const witness = {
       threshold: 1,
       witnesses: [{
-        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-        weight: 1
+        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
       }]
     };
 
@@ -160,8 +159,7 @@ describe("Injectable Cryptography Tests", () => {
     const witness = {
       threshold: 1,
       witnesses: [{
-        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-        weight: 1
+        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
       }]
     };
 
@@ -204,8 +202,7 @@ describe("Injectable Cryptography Tests", () => {
     const witness = {
       threshold: 1,
       witnesses: [{
-        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
-        weight: 1
+        id: "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK"
       }]
     };
 

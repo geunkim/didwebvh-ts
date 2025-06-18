@@ -1,13 +1,34 @@
-import fs from 'node:fs';
 import { canonicalize } from 'json-canonicalize';
 import { config } from './config';
 import { resolveDIDFromLog } from './method';
 import type { CreateDIDInterface, DIDDoc, DIDLog, VerificationMethod, WitnessProofFileEntry } from './interfaces';
+import { BASE_CONTEXT } from './constants';
 import { createBuffer, bufferToString } from './utils/buffer';
 import { createMultihash, encodeBase58Btc, MultihashAlgorithm } from './utils/multiformats';
 import { createHash } from './utils/crypto';
 
+let fsModule: typeof import('fs') | null = null;
+if (!config.isBrowser) {
+  fsModule = await import('node:fs');
+}
+const getFS = () => {
+  if (!fsModule) {
+    throw new Error('Filesystem access is not available in this environment');
+  }
+  return fsModule;
+};
+
+const toASCII = (domain: string): string => {
+  try {
+    const scheme = domain.includes('localhost') ? 'http' : 'https';
+    return new URL(`${scheme}://${domain}`).hostname;
+  } catch {
+    return domain;
+  }
+};
+
 export const readLogFromDisk = (path: string): DIDLog => {
+  const fs = getFS();
   return readLogFromString(fs.readFileSync(path, 'utf8'));
 }
 
@@ -16,6 +37,7 @@ export const readLogFromString = (str: string): DIDLog => {
 }
 
 export const writeLogToDisk = (path: string, log: DIDLog) => {
+  const fs = getFS();
   try {
     const dir = path.substring(0, path.lastIndexOf('/'));
     if (!fs.existsSync(dir)) {
@@ -33,6 +55,17 @@ export const writeLogToDisk = (path: string, log: DIDLog) => {
   }
 }
 
+export const maybeWriteTestLog = (did: string, log: DIDLog) => {
+  if (!config.isTestEnvironment) return;
+  try {
+    const fileSafe = did.replace(/[^a-zA-Z0-9]+/g, '_');
+    const path = `./test/logs/${fileSafe}.jsonl`;
+    writeLogToDisk(path, log);
+  } catch (error) {
+    console.error('Error writing test log:', error);
+  }
+};
+
 export const writeVerificationMethodToEnv = (verificationMethod: VerificationMethod) => {
   const envFilePath = process.cwd() + '/.env';
   
@@ -44,6 +77,7 @@ export const writeVerificationMethodToEnv = (verificationMethod: VerificationMet
     secretKeyMultibase: verificationMethod.secretKeyMultibase || ''
   };
 
+  const fs = getFS();
   try {
     let envContent = '';
     let existingData: any[] = [];
@@ -98,12 +132,22 @@ export const getBaseUrl = (id: string) => {
   if (!id.startsWith('did:webvh:') || parts.length < 4) {
     throw new Error(`${id} is not a valid did:webvh identifier`);
   }
-  
-  let domain = parts.slice(3).join('/');
-  domain = domain.replace(/%2F/g, '/');
-  domain = domain.replace(/%3A/g, ':');
-  const protocol = domain.includes('localhost') ? 'http' : 'https';
-  return `${protocol}://${domain}`;
+
+  let remainder = decodeURIComponent(parts.slice(3).join('/'));
+  const protocol = remainder.includes('localhost') ? 'http' : 'https';
+
+  const [hostPart, ...pathParts] = remainder.split('/');
+  let [host, port] = decodeURIComponent(hostPart).split(':');
+
+  host = host
+    .split('.')
+    .map(label => toASCII(label.normalize('NFC')))
+    .join('.');
+
+  const normalizedHost = port ? `${host}:${port}` : host;
+  const path = pathParts.join('/');
+
+  return `${protocol}://${normalizedHost}${path ? '/' + path : ''}`;
 }
 
 export const getFileUrl = (id: string) => {
@@ -122,9 +166,17 @@ export async function fetchLogFromIdentifier(identifier: string, controlled: boo
       const didParts = identifier.split(':');
       const fileIdentifier = didParts.slice(4).join(':');
       const logPath = `./src/routes/${fileIdentifier || '.well-known'}/did.jsonl`;
-      
+
       try {
-        const text = (await Bun.file(logPath).text()).trim();
+        let text: string;
+        if (typeof Bun !== 'undefined' && Bun.file) {
+          text = (await Bun.file(logPath).text()).trim();
+        } else if (!config.isBrowser) {
+          const fs = getFS();
+          text = fs.readFileSync(logPath, 'utf8').trim();
+        } else {
+          throw new Error('Local log retrieval not supported in browser');
+        }
         if (!text) {
           return [];
         }
@@ -177,13 +229,10 @@ export const deriveNextKeyHash = async (input: string): Promise<string> => {
 export const createDIDDoc = async (options: CreateDIDInterface): Promise<{doc: DIDDoc}> => {
   const {controller} = options;
   const all = normalizeVMs(options.verificationMethods, controller);
-  
+
   // Create the base document
   const doc: DIDDoc = {
-    "@context": [
-      "https://www.w3.org/ns/did/v1",
-      "https://w3id.org/security/multikey/v1"
-    ],
+    "@context": options.context || BASE_CONTEXT,
     id: controller,
     controller,
   };

@@ -7,38 +7,40 @@ import { fetchWitnessProofs } from './utils';
 import { multibaseDecode } from './utils/multiformats';
 
 export function validateWitnessParameter(witness: WitnessParameter): void {
-  if (!witness.threshold || witness.threshold < 1) {
-    throw new Error('Witness threshold must be at least 1');
-  }
-
   if (!witness.witnesses || !Array.isArray(witness.witnesses) || witness.witnesses.length === 0) {
     throw new Error('Witness list cannot be empty');
   }
 
+  if (!witness.threshold || witness.threshold < 1 || witness.threshold > witness.witnesses.length) {
+    throw new Error('Witness threshold must be between 1 and the number of witnesses');
+  }
+
+  const ids = new Set<string>();
   for (const w of witness.witnesses) {
     if (!w.id.startsWith('did:key:')) {
       throw new Error('Witness DIDs must be did:key format');
     }
-    if (typeof w.weight !== 'number' || w.weight < 1) {
-      throw new Error('Witness weight must be a positive number');
+    if (ids.has(w.id)) {
+      throw new Error(`Duplicate witness id: ${w.id}`);
     }
+    ids.add(w.id);
   }
 }
 
 export function calculateWitnessWeight(proofs: DataIntegrityProof[], witnesses: WitnessEntry[]): number {
-  let totalWeight = 0;
-  
+  const processed = new Set<string>();
+
   for (const proof of proofs) {
     const witness = witnesses.find(w => proof.verificationMethod.startsWith(w.id));
     if (witness) {
       if (proof.cryptosuite !== 'eddsa-jcs-2022') {
         throw new Error('Invalid witness proof cryptosuite');
       }
-      totalWeight += witness.weight;
+      processed.add(witness.id);
     }
   }
 
-  return totalWeight;
+  return processed.size;
 }
 
 export async function verifyWitnessProofs(
@@ -51,7 +53,7 @@ export async function verifyWitnessProofs(
     throw new Error('Verifier implementation is required');
   }
 
-  let totalWeight = 0;
+  let approvals = 0;
   const processedWitnesses = new Set<string>();
 
   // Process each proof set sequentially to avoid race conditions
@@ -150,7 +152,7 @@ export async function verifyWitnessProofs(
           throw new Error('Invalid witness proof signature');
         }
 
-        totalWeight += witness.weight;
+        approvals++;
         processedWitnesses.add(witness.id);
 
       } catch (error: any) {
@@ -159,8 +161,8 @@ export async function verifyWitnessProofs(
     }
   }
 
-  if (totalWeight < currentWitness.threshold) {
-    throw new Error(`Witness threshold not met: got ${totalWeight}, need ${currentWitness.threshold}`);
+  if (approvals < currentWitness.threshold) {
+    throw new Error(`Witness threshold not met: got ${approvals}, need ${currentWitness.threshold}`);
   }
 }
 

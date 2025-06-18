@@ -10,16 +10,18 @@
     "dist/**/*"
   ],
   "scripts": {
-    "dev": "bun --watch --inspect-wait ./examples/resolvers/elysia/resolver.ts",
-    "server": "bun --watch ./examples/resolvers/elysia/resolver.ts",
-    "test": "bun test",
-    "test:watch": "bun test --watch",
-    "test:bail": "bun test --watch --bail --verbose",
-    "test:log": "mkdir -p ./test/logs && LOG_RESOLVES=true bun test &> ./test/logs/test-run.txt",
+    "dev": "bun --watch --inspect-wait ./examples/elysia-resolver.ts",
+    "server": "bun --watch ./examples/elysia-resolver.ts",
+    "test": "NODE_ENV=test rm -rf ./test/logs/** && bun test",
+    "test:watch": "NODE_ENV=test rm -rf ./test/logs/** && bun test --watch",
+    "test:bail": "NODE_ENV=test rm -rf ./test/logs/** && bun test --watch --bail --verbose",
+    "test:log": "mkdir -p ./test/logs && LOG_RESOLVES=true NODE_ENV=test rm -rf ./test/logs/** && bun test &> ./test/logs/test-run.txt",
     "cli": "bun src/cli.ts",
     "build": "bun run scripts/build.ts",
     "build:clean": "rm -rf dist",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "example:signer": "bun run examples/signer.ts",
+    "example:resolver": "bun run examples/elysia-resolver.ts"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

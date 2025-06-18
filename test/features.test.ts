@@ -142,7 +142,7 @@ test("Require `nextKeyHashes` to continue if previously set", async () => {
       versionId: "1-5v2bjwgmeqpnuu669zd7956w1w14",
       versionTime: "2024-06-06T08:23:06Z",
       parameters: {
-        method: "did:webvh:0.5",
+        method: "did:webvh:1.0",
         scid: "5v2bjwgmeqpnuu669zd7956w1w14",
         updateKeys: [ "z6Mkr2D4ixckmQx8tAVvXEhMuaMhzahxe61qJt7G9vYyiXiJ" ],
         nextKeyHashes: ["hash1"]

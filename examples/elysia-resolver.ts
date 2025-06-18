@@ -43,6 +43,30 @@ const elysiaVerifier = createElysiaVerifier();
 
 const WELL_KNOWN_ALLOW_LIST = ['did.jsonl'];
 
+// Helper function to map DID resolution errors to HTTP status codes
+const getStatusCodeFromError = (errorType?: string): number => {
+  switch (errorType) {
+    case 'INVALID_DID':
+    case 'INVALID_DID_URL':
+    case 'INVALID_OPTIONS':
+      return 400;
+    case 'NOT_FOUND':
+      return 404;
+    case 'REPRESENTATION_NOT_SUPPORTED':
+      return 406;
+    case 'METHOD_NOT_SUPPORTED':
+    case 'UNSUPPORTED_PUBLIC_KEY_TYPE':
+      return 501;
+    case 'INVALID_DID_DOCUMENT':
+    case 'INVALID_PUBLIC_KEY':
+    case 'INVALID_PUBLIC_KEY_LENGTH':
+    case 'INVALID_PUBLIC_KEY_TYPE':
+    case 'INTERNAL_ERROR':
+    default:
+      return 500;
+  }
+};
+
 const getFile = async ({
   params: {path, file},
   isRemote = false,
@@ -114,11 +138,12 @@ const getFile = async ({
 
 const app = new Elysia()
   .get('/health', () => 'ok')
-  .get('/resolve/:id', async ({ params, query }) => {
+  .get('/resolve/:id', async ({ params, query, set }) => {
     try {
       const id = params.id;
       if (!id) {
-        throw new Error('No id provided');
+        set.status = 400;
+        return { error: 'No id provided' };
       }
 
       const [didPart, ...pathParts] = id.split('/');
@@ -132,7 +157,14 @@ const app = new Elysia()
         };
         
         console.log(`Resolving DID ${didPart}`);
-        return await resolveDID(didPart, options);
+        const result = await resolveDID(didPart, options);
+
+        // Check for error in meta and set appropriate status code
+        if (result.meta && result.meta.error) {
+          set.status = getStatusCodeFromError(result.meta.error);
+        }
+
+        return result;
       }
       
       const {did, doc, controlled} = await resolveDID(didPart, { verifier: elysiaVerifier });
@@ -152,6 +184,7 @@ const app = new Elysia()
       
       return fileContent;
     } catch (error: unknown) {
+      set.status = 500;
       return {
         error: 'Resolution failed',
         details: error instanceof Error ? error.message : String(error)

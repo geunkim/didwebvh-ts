@@ -16,7 +16,8 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
     validateWitnessParameter(options.witness);
   }
   
-  const controller = `did:${METHOD}:${PLACEHOLDER}:${options.domain}`;
+  const encodedDomain = encodeURIComponent(options.domain);
+  const controller = `did:${METHOD}:${PLACEHOLDER}:${encodedDomain}`;
   const createdDate = createDate(options.created);
   let {doc} = await createDIDDoc({...options, controller});
   const params = {

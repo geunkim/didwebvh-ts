@@ -55,6 +55,17 @@ export const writeLogToDisk = (path: string, log: DIDLog) => {
   }
 }
 
+export const maybeWriteTestLog = (did: string, log: DIDLog) => {
+  if (!config.isTestEnvironment) return;
+  try {
+    const fileSafe = did.replace(/[^a-zA-Z0-9]+/g, '_');
+    const path = `./test/logs/${fileSafe}.jsonl`;
+    writeLogToDisk(path, log);
+  } catch (error) {
+    console.error('Error writing test log:', error);
+  }
+};
+
 export const writeVerificationMethodToEnv = (verificationMethod: VerificationMethod) => {
   const envFilePath = process.cwd() + '/.env';
   

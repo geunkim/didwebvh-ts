@@ -1,4 +1,4 @@
-import { fetchLogFromIdentifier, getActiveDIDs } from "./utils";
+import { fetchLogFromIdentifier, getActiveDIDs, maybeWriteTestLog } from "./utils";
 import type { CreateDIDInterface, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry } from './interfaces';
 import * as v1 from './method_versions/method.v1.0';
 import * as v0_5 from './method_versions/method.v0.5';
@@ -27,10 +27,11 @@ function getWebvhVersionFromOptions(options: any): string {
 
 export const createDID = async (options: CreateDIDInterface) => {
   const version = getWebvhVersionFromOptions(options);
-  if (version === '0.5') {
-    return v0_5.createDID(options);
-  }
-  return v1.createDID(options);
+  const result = version === '0.5'
+    ? await v0_5.createDID(options)
+    : await v1.createDID(options);
+  maybeWriteTestLog(result.did, result.log);
+  return result;
 };
 
 export const resolveDID = async (did: string, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[], scid?: string } = {}) => {
@@ -47,9 +48,11 @@ export const resolveDID = async (did: string, options: ResolutionOptions & { wit
     const optsWithScid = { ...options, scid };
     if (version === '0.5') {
       const result = await v0_5.resolveDIDFromLog(log, optsWithScid);
+      maybeWriteTestLog(result.did, log);
       return { ...result, controlled };
     }
     const result = await v1.resolveDIDFromLog(log, optsWithScid);
+    maybeWriteTestLog(result.did, log);
     return { ...result, controlled };
   } catch (e: any) {
     let errorType = 'INVALID_DID';
@@ -80,23 +83,29 @@ export const resolveDID = async (did: string, options: ResolutionOptions & { wit
 export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[] } = {}) => {
   const version = getWebvhVersionFromLog(log);
   if (version === '0.5') {
-    return v0_5.resolveDIDFromLog(log, options);
+    const result = await v0_5.resolveDIDFromLog(log, options);
+    maybeWriteTestLog(result.did, log);
+    return result;
   }
-  return v1.resolveDIDFromLog(log, options);
+  const result = await v1.resolveDIDFromLog(log, options);
+  maybeWriteTestLog(result.did, log);
+  return result;
 };
 
 export const updateDID = async (options: UpdateDIDInterface & { services?: any[], domain?: string, updated?: string }) => {
   const version = options.log ? getWebvhVersionFromLog(options.log) : getWebvhVersionFromOptions(options);
-  if (version === '0.5') {
-    return v0_5.updateDID(options);
-  }
-  return v1.updateDID(options);
+  const result = version === '0.5'
+    ? await v0_5.updateDID(options)
+    : await v1.updateDID(options);
+  maybeWriteTestLog(result.did, result.log);
+  return result;
 };
 
 export const deactivateDID = async (options: DeactivateDIDInterface & { updateKeys?: string[] }) => {
   const version = options.log ? getWebvhVersionFromLog(options.log) : getWebvhVersionFromOptions(options);
-  if (version === '0.5') {
-    return v0_5.deactivateDID(options);
-  }
-  return v1.deactivateDID(options);
+  const result = version === '0.5'
+    ? await v0_5.deactivateDID(options)
+    : await v1.deactivateDID(options);
+  maybeWriteTestLog(result.did, result.log);
+  return result;
 };

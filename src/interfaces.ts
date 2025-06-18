@@ -40,7 +40,7 @@ export interface DIDResolutionMeta {
   deactivated: boolean;
   witness?: WitnessParameter | undefined | null;
   watchers?: string[] | null;
-  error?: 'notFound' | 'invalidDid';
+  error?: 'NOT_FOUND' | 'INVALID_DID' | 'INVALID_DID_URL' | 'INVALID_OPTIONS' | 'REPRESENTATION_NOT_SUPPORTED' | 'METHOD_NOT_SUPPORTED' | 'UNSUPPORTED_PUBLIC_KEY_TYPE' | 'INVALID_DID_DOCUMENT' | 'INVALID_PUBLIC_KEY' | 'INVALID_PUBLIC_KEY_LENGTH' | 'INVALID_PUBLIC_KEY_TYPE' | 'INTERNAL_ERROR';
   problemDetails?: ProblemDetails;
   latestVersionId?: string;
 }
@@ -169,6 +169,7 @@ export interface ResolutionOptions {
   versionTime?: Date;
   verificationMethod?: string;
   verifier?: Verifier;
+  scid?: string;
 }
 
 export interface WitnessProofFileEntry {

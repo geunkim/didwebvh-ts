@@ -3,25 +3,26 @@ import type { CreateDIDInterface, DIDLog, UpdateDIDInterface, DeactivateDIDInter
 import * as v1 from './method_versions/method.v1.0';
 import * as v0_5 from './method_versions/method.v0.5';
 
+const LATEST_VERSION = '1.0';
 
 function getWebvhVersionFromMethod(method?: string): string {
-  if (!method) return '1.0';
+  if (!method) return LATEST_VERSION;
   const match = method.match(/^did:webvh:(\d+\.\d+)$/);
-  return match ? match[1] : '1.0';
+  return match ? match[1] : LATEST_VERSION;
 }
 
 function getWebvhVersionFromLog(log: DIDLog): string {
   if (log && log.length > 0 && log[0].parameters && log[0].parameters.method) {
     return getWebvhVersionFromMethod(log[0].parameters.method);
   }
-  return '1.0';
+  return LATEST_VERSION;
 }
 
 function getWebvhVersionFromOptions(options: any): string {
   if (options && options.method) {
     return getWebvhVersionFromMethod(options.method);
   }
-  return '1.0';
+  return LATEST_VERSION;
 }
 
 export const createDID = async (options: CreateDIDInterface) => {
@@ -32,20 +33,26 @@ export const createDID = async (options: CreateDIDInterface) => {
   return v1.createDID(options);
 };
 
-export const resolveDID = async (did: string, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[] } = {}) => {
+export const resolveDID = async (did: string, options: ResolutionOptions & { witnessProofs?: WitnessProofFileEntry[], scid?: string } = {}) => {
   const activeDIDs = await getActiveDIDs();
   const controlled = activeDIDs.includes(did);
+  let scid: string | undefined = undefined;
+  const didParts = did.split(":");
+  if (didParts.length > 2 && didParts[0] === "did" && didParts[1] === "webvh") {
+    scid = didParts[2];
+  }
   try {
     const log = await fetchLogFromIdentifier(did, controlled);
     const version = getWebvhVersionFromLog(log);
+    const optsWithScid = { ...options, scid };
     if (version === '0.5') {
-      const result = await v0_5.resolveDIDFromLog(log, options);
+      const result = await v0_5.resolveDIDFromLog(log, optsWithScid);
       return { ...result, controlled };
     }
-    const result = await v1.resolveDIDFromLog(log, options);
+    const result = await v1.resolveDIDFromLog(log, optsWithScid);
     return { ...result, controlled };
   } catch (e: any) {
-    let errorType: 'notFound' | 'invalidDid' = 'invalidDid';
+    let errorType = 'INVALID_DID';
     const message = e instanceof Error ? e.message : String(e);
     if (/not found/i.test(message) || /404/.test(message)) {
       errorType = 'notFound';

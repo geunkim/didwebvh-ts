@@ -53,7 +53,7 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
     {...prelimEntry, versionId: `1-${logEntryHash2}`, proof: prelimEntry.proof}, 
     params.updateKeys, 
     params.witness,
-    true, // skipWitnessVerification
+    true,
     options.verifier
   );
   if (!verified) {
@@ -142,8 +142,9 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       };
       const logEntryHash = await deriveHash(logEntry);
       meta.previousLogEntryHash = logEntryHash;
-      if (!await scidIsFromHash(meta.scid, logEntryHash)) {
-        throw new Error(`SCID '${meta.scid}' not derived from logEntryHash '${logEntryHash}'`);
+      const scidToCheck = options.scid || meta.scid;
+      if (!await scidIsFromHash(scidToCheck, logEntryHash)) {
+        throw new Error(`SCID '${scidToCheck}' (from DID: '${options.scid}', from log: '${meta.scid}') not derived from logEntryHash '${logEntryHash}'`);
       }
       const prelimEntry = JSON.parse(JSON.stringify(logEntry).replaceAll(PLACEHOLDER, meta.scid));
       const logEntryHash2 = await deriveHash(prelimEntry);

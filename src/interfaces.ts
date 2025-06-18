@@ -28,20 +28,21 @@ export interface ProblemDetails {
 }
 
 export interface DIDResolutionMeta {
-  versionId?: string;
-  created?: string;
-  updated?: string;
+  versionId: string;
+  created: string;
+  updated: string;
   previousLogEntryHash?: string;
-  updateKeys?: string[];
-  scid?: string;
-  prerotation?: boolean;
-  portable?: boolean;
-  nextKeyHashes?: string[];
-  deactivated?: boolean;
+  updateKeys: string[];
+  scid: string;
+  prerotation: boolean;
+  portable: boolean;
+  nextKeyHashes: string[];
+  deactivated: boolean;
   witness?: WitnessParameter | undefined | null;
   watchers?: string[] | null;
   error?: 'notFound' | 'invalidDid';
   problemDetails?: ProblemDetails;
+  latestVersionId?: string;
 }
 
 export interface DIDDoc {

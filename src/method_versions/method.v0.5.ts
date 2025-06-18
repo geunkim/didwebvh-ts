@@ -103,7 +103,13 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
   };
   let host = '';
   let i = 0;
-  
+
+  let resolvedDoc: any = null;
+  let resolvedMeta: DIDResolutionMeta | null = null;
+  let lastValidDoc: any = null;
+  let lastValidMeta: DIDResolutionMeta | null = null;
+
+  try {
   while (i < resolutionLog.length) {
     const { versionId, versionTime, parameters, state, proof } = resolutionLog[i];
     const [version, entryHash] = versionId.split('-');
@@ -220,17 +226,29 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
     }
 
     if (options.verificationMethod && findVerificationMethod(doc, options.verificationMethod)) {
-      return {did, doc, meta};
+      if (!resolvedDoc) {
+        resolvedDoc = clone(doc);
+        resolvedMeta = { ...meta };
+      }
     }
 
     if (options.versionNumber === parseInt(version) || options.versionId === meta.versionId) {
-      return {did, doc, meta};
+      if (!resolvedDoc) {
+        resolvedDoc = clone(doc);
+        resolvedMeta = { ...meta };
+      }
     }
     if (options.versionTime && options.versionTime > new Date(meta.updated)) {
       if (resolutionLog[i+1] && options.versionTime < new Date(resolutionLog[i+1].versionTime)) {
-        return {did, doc, meta};
+        if (!resolvedDoc) {
+          resolvedDoc = clone(doc);
+          resolvedMeta = { ...meta };
+        }
       } else if(!resolutionLog[i+1]) {
-        return {did, doc, meta};
+        if (!resolvedDoc) {
+          resolvedDoc = clone(doc);
+          resolvedMeta = { ...meta };
+        }
       }
     }
 
@@ -248,10 +266,26 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       }
     }
 
+    lastValidDoc = clone(doc);
+    lastValidMeta = { ...meta };
+
     i++;
   }
+  } catch (e) {
+    if (!resolvedDoc) {
+      throw e;
+    }
+  }
 
-  return {did, doc, meta};
+  if (!lastValidDoc || !lastValidMeta) {
+    throw new Error('DID log is invalid');
+  }
+
+  const finalDoc = resolvedDoc || lastValidDoc;
+  const finalMeta = resolvedMeta || lastValidMeta;
+  finalMeta.latestVersionId = lastValidMeta.versionId;
+
+  return {did: finalDoc.id, doc: finalDoc, meta: finalMeta};
 }
 
 export const updateDID = async (options: UpdateDIDInterface & { services?: any[], domain?: string, updated?: string }): Promise<{did: string, doc: any, meta: DIDResolutionMeta, log: DIDLog}> => {

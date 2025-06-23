@@ -119,6 +119,7 @@ export interface CreateDIDInterface {
   signer: Signer;
   updateKeys: string[];
   verificationMethods: VerificationMethod[];
+  paths?: string[];
   controller?: string;
   context?: string | string[] | object | object[];
   alsoKnownAs?: string[];

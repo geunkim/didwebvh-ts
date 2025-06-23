@@ -7,13 +7,21 @@ import { createBuffer, bufferToString } from './utils/buffer';
 import { createMultihash, encodeBase58Btc, MultihashAlgorithm } from './utils/multiformats';
 import { createHash } from './utils/crypto';
 
+// Environment detection - treat React Native like a browser
+const isNodeEnvironment = typeof process !== 'undefined' && process.versions && process.versions.node && typeof window === 'undefined';
+
 let fsModule: typeof import('fs') | null = null;
-if (!config.isBrowser) {
-  fsModule = await import('node:fs');
+if (isNodeEnvironment) {
+  try {
+    fsModule = await import('node:fs');
+  } catch (error) {
+    console.warn('Failed to import node:fs, filesystem operations will not be available:', error);
+  }
 }
+
 const getFS = () => {
   if (!fsModule) {
-    throw new Error('Filesystem access is not available in this environment');
+    throw new Error('Filesystem access is not available in this environment (React Native, browser, or failed Node.js import)');
   }
   return fsModule;
 };
@@ -171,11 +179,11 @@ export async function fetchLogFromIdentifier(identifier: string, controlled: boo
         let text: string;
         if (typeof Bun !== 'undefined' && Bun.file) {
           text = (await Bun.file(logPath).text()).trim();
-        } else if (!config.isBrowser) {
+        } else if (isNodeEnvironment) {
           const fs = getFS();
           text = fs.readFileSync(logPath, 'utf8').trim();
         } else {
-          throw new Error('Local log retrieval not supported in browser');
+          throw new Error('Local log retrieval not supported in this environment');
         }
         if (!text) {
           return [];

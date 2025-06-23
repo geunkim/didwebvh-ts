@@ -17,7 +17,8 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
   }
   
   const encodedDomain = encodeURIComponent(options.domain);
-  const controller = `did:${METHOD}:${PLACEHOLDER}:${encodedDomain}`;
+  const path = options.paths?.join(':');
+  const controller = `did:${METHOD}:${PLACEHOLDER}:${encodedDomain}${path ? `:${path}` : ''}`;
   const createdDate = createDate(options.created);
   let {doc} = await createDIDDoc({...options, controller});
   const params = {

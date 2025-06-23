@@ -1,3 +1,15 @@
+# [2.3.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.2.0...v2.3.0) (2025-06-23)
+
+
+### Bug Fixes
+
+* improve filesystem access handling in utils ([ec72a75](https://github.com/decentralized-identity/didwebvh-ts/commit/ec72a75b0efa757fe5e76ce1d7f522ed56377c6b))
+
+
+### Features
+
+* add paths support in DID creation and testing ([ee51df5](https://github.com/decentralized-identity/didwebvh-ts/commit/ee51df52059a06d583eece78bc8aad9e9abc9802))
+
 # [2.2.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.1.0...v2.2.0) (2025-06-18)
 
 

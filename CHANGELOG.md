@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.0...v2.3.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* update log handling to use async/await ([31067af](https://github.com/decentralized-identity/didwebvh-ts/commit/31067af464b802463859352a49291c02ac111857))
+
 # [2.3.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.2.0...v2.3.0) (2025-06-23)
 
 

@@ -1,4 +1,4 @@
-import { clone, createDate, createDIDDoc, createSCID, deriveHash, fetchLogFromIdentifier, findVerificationMethod, getActiveDIDs, getBaseUrl } from "../utils";
+import { clone, createDate, createDIDDoc, createSCID, deriveHash, findVerificationMethod, getActiveDIDs, getBaseUrl } from "../utils";
 import {METHOD, PLACEHOLDER } from '../constants';
 import { documentStateIsValid, hashChainValid, newKeysAreInNextKeys, scidIsFromHash } from '../assertions';
 import type { CreateDIDInterface, DIDResolutionMeta, DIDLogEntry, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry } from '../interfaces';

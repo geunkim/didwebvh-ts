@@ -40,7 +40,7 @@ describe("CLI End-to-End Tests", () => {
     expect(fs.existsSync(TEST_LOG_FILE)).toBe(true);
     
     // Read and verify the log content
-    const log = readLogFromDisk(TEST_LOG_FILE);
+    const log = await readLogFromDisk(TEST_LOG_FILE);
     expect(log).toHaveLength(1);
     expect(log[0].parameters.portable).toBe(true);
     expect(log[0].parameters.method).toBe('did:webvh:1.0');
@@ -63,7 +63,7 @@ describe("CLI End-to-End Tests", () => {
 
   test("Update DID using CLI", async () => {
     // Read the current log to get the latest state
-    const currentLog = readLogFromDisk(TEST_LOG_FILE);
+    const currentLog = await readLogFromDisk(TEST_LOG_FILE);
     const { meta } = await resolveDIDFromLog(currentLog);
 
     // Get the authorized key from meta
@@ -75,7 +75,7 @@ describe("CLI End-to-End Tests", () => {
     expect(proc.exitCode).toBe(0);
     
     // Verify the update
-    const log = readLogFromDisk(TEST_LOG_FILE);
+    const log = await readLogFromDisk(TEST_LOG_FILE);
     expect(log).toHaveLength(2);
     
     // Check if service was added
@@ -88,7 +88,7 @@ describe("CLI End-to-End Tests", () => {
 
   test("Second Update DID using CLI", async () => {
     // Read the current log to get the latest state
-    const currentLog = readLogFromDisk(TEST_LOG_FILE);
+    const currentLog = await readLogFromDisk(TEST_LOG_FILE);
     const { meta } = await resolveDIDFromLog(currentLog);
 
     // Get the authorized key from meta
@@ -100,7 +100,7 @@ describe("CLI End-to-End Tests", () => {
     expect(proc.exitCode).toBe(0);
     
     // Verify the update
-    const log = readLogFromDisk(TEST_LOG_FILE);
+    const log = await readLogFromDisk(TEST_LOG_FILE);
     expect(log).toHaveLength(3);
     
     // Check if new service was added
@@ -113,7 +113,7 @@ describe("CLI End-to-End Tests", () => {
 
   test("Deactivate DID using CLI", async () => {
     // Read the current log to get the latest state
-    const currentLog = readLogFromDisk(TEST_LOG_FILE);
+    const currentLog = await readLogFromDisk(TEST_LOG_FILE);
     const { meta } = await resolveDIDFromLog(currentLog);
 
     // Read the current verification method from env
@@ -133,7 +133,7 @@ describe("CLI End-to-End Tests", () => {
     expect(proc.exitCode).toBe(0);
     
     // Verify the deactivation
-    const log = readLogFromDisk(TEST_LOG_FILE);
+    const log = await readLogFromDisk(TEST_LOG_FILE);
     const lastEntry = log[log.length - 1];
     expect(lastEntry.parameters.deactivated).toBe(true);
   });
@@ -152,7 +152,7 @@ describe("CLI End-to-End Tests", () => {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Get the current authorized key and DID
-    const currentLog = readLogFromDisk(prerotationLogFile);
+    const currentLog = await readLogFromDisk(prerotationLogFile);
     const { did, meta } = await resolveDIDFromLog(currentLog);
     const authorizedKey = meta.updateKeys[0];
     
@@ -173,7 +173,7 @@ describe("CLI End-to-End Tests", () => {
     await new Promise(resolve => setTimeout(resolve, 100));
     
     // Get the current authorized key and DID
-    const currentLog = readLogFromDisk(vmLogFile);
+    const currentLog = await readLogFromDisk(vmLogFile);
     const { did, meta } = await resolveDIDFromLog(currentLog);
     const authorizedKey = meta.updateKeys[0];
 
@@ -196,7 +196,7 @@ describe("CLI End-to-End Tests", () => {
     expect(proc.exitCode).toBe(0);
     
     // Verify all VM types were added
-    const finalLog = readLogFromDisk(vmLogFile);
+    const finalLog = await readLogFromDisk(vmLogFile);
     const finalEntry = finalLog[finalLog.length - 1];
     
     const vmTypes = ['authentication', 'assertionMethod', 'keyAgreement', 'capabilityInvocation', 'capabilityDelegation'] as const;
@@ -220,7 +220,7 @@ describe("CLI End-to-End Tests", () => {
     await new Promise(resolve => setTimeout(resolve, 100));
     
     // Get the current authorized key and DID
-    const currentLog = readLogFromDisk(akLogFile);
+    const currentLog = await readLogFromDisk(akLogFile);
     const { did, meta } = await resolveDIDFromLog(currentLog);
     const authorizedKey = meta.updateKeys[0];
 
@@ -243,7 +243,7 @@ describe("CLI End-to-End Tests", () => {
     expect(proc.exitCode).toBe(0);
     
     // Verify alsoKnownAs was added
-    const finalLog = readLogFromDisk(akLogFile);
+    const finalLog = await readLogFromDisk(akLogFile);
     const lastEntry = finalLog[finalLog.length - 1];
     expect(lastEntry.state.alsoKnownAs).toBeDefined();
     expect(Array.isArray(lastEntry.state.alsoKnownAs)).toBe(true);
@@ -257,7 +257,7 @@ describe("CLI End-to-End Tests", () => {
     expect(createProc.exitCode).toBe(0);
     
     // Get the DID from the log
-    const log = readLogFromDisk(resolveLogFile);
+    const log = await readLogFromDisk(resolveLogFile);
     const { did } = await resolveDIDFromLog(log);
     
     // Test resolve command with log file instead of DID
@@ -288,7 +288,7 @@ describe("Witness CLI End-to-End Tests", async () => {
       expect(proc.exitCode).toBe(0);
       
       // Verify the witness configuration
-      const log = readLogFromDisk(logFile);
+      const log = await readLogFromDisk(logFile);
       
       // Add null checks for TypeScript
       if (!log[0]?.parameters?.witness) {

@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.1...v2.3.2) (2025-06-24)
+
+
+### Bug Fixes
+
+* improve dynamic filesystem module loading ([817897e](https://github.com/decentralized-identity/didwebvh-ts/commit/817897e2fea7183ab46bda2d16b69325f9f0ff79))
+
 ## [2.3.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.0...v2.3.1) (2025-06-24)
 
 

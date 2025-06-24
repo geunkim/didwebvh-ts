@@ -10,6 +10,10 @@ import { createHash } from './utils/crypto';
 // Environment detection - treat React Native like a browser
 const isNodeEnvironment = typeof process !== 'undefined' && process.versions && process.versions.node && typeof window === 'undefined';
 
+// Avoid bundlers including `fs` by constructing the module name at runtime
+const fsModuleSpecifier = ['node', 'fs'].join(':');
+const dynamicImport = new Function('m', 'return import(m)') as (m: string) => Promise<any>;
+
 let fsModule: typeof import('fs') | null = null;
 let fsImportPromise: Promise<typeof import('fs')> | null = null;
 
@@ -26,7 +30,7 @@ const getFS = async (): Promise<typeof import('fs')> => {
     return fsImportPromise;
   }
   
-  fsImportPromise = import('node:fs').then(module => {
+  fsImportPromise = dynamicImport(fsModuleSpecifier).then(module => {
     fsModule = module;
     return module;
   }).catch(error => {

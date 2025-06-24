@@ -135,11 +135,11 @@ export async function handleCreate(args: string[]) {
       }
 
       // Write log to file
-      writeLogToDisk(output, log);
+      await writeLogToDisk(output, log);
       console.log(`DID log written to ${output}`);
 
       // Save verification method to env
-      writeVerificationMethodToEnv({
+      await writeVerificationMethodToEnv({
         ...authKey, 
         controller: did, 
         id: `${did}#${authKey.publicKeyMultibase?.slice(-8)}`
@@ -176,7 +176,7 @@ export async function handleResolve(args: string[]) {
   try {
     let log: DIDLog;
     if (logFile) {
-      log = readLogFromDisk(logFile);
+      log = await readLogFromDisk(logFile);
     } else {
       log = await fetchLogFromIdentifier(didIdentifier);
     }
@@ -212,7 +212,7 @@ export async function handleUpdate(args: string[]) {
   }
 
   try {
-    const log = readLogFromDisk(logFile);
+    const log = await readLogFromDisk(logFile);
     const { did, meta } = await resolveDIDFromLog(log);
     console.log('\nCurrent DID:', did);
     console.log('Current meta:', meta);
@@ -284,7 +284,7 @@ export async function handleUpdate(args: string[]) {
     });
 
     if (output) {
-      writeLogToDisk(output, result.log);
+      await writeLogToDisk(output, result.log);
       console.log(`Updated DID log written to ${output}`);
 
       // Write DID document for reference
@@ -312,7 +312,7 @@ export async function handleDeactivate(args: string[]) {
 
   try {
     // Read the current log to get the latest state
-    const log = readLogFromDisk(logFile);
+    const log = await readLogFromDisk(logFile);
     const { did, meta } = await resolveDIDFromLog(log);
     console.log('Current DID:', did);
     console.log('Current meta:', meta);
@@ -339,7 +339,7 @@ export async function handleDeactivate(args: string[]) {
     });
 
     if (output) {
-      writeLogToDisk(output, result.log);
+      await writeLogToDisk(output, result.log);
       console.log(`Deactivated DID log written to ${output}`);
     }
 

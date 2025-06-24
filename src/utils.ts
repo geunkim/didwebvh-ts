@@ -11,19 +11,30 @@ import { createHash } from './utils/crypto';
 const isNodeEnvironment = typeof process !== 'undefined' && process.versions && process.versions.node && typeof window === 'undefined';
 
 let fsModule: typeof import('fs') | null = null;
-if (isNodeEnvironment) {
-  try {
-    fsModule = await import('node:fs');
-  } catch (error) {
-    console.warn('Failed to import node:fs, filesystem operations will not be available:', error);
-  }
-}
+let fsImportPromise: Promise<typeof import('fs')> | null = null;
 
-const getFS = () => {
-  if (!fsModule) {
+const getFS = async (): Promise<typeof import('fs')> => {
+  if (!isNodeEnvironment) {
     throw new Error('Filesystem access is not available in this environment (React Native, browser, or failed Node.js import)');
   }
-  return fsModule;
+  
+  if (fsModule) {
+    return fsModule;
+  }
+  
+  if (fsImportPromise) {
+    return fsImportPromise;
+  }
+  
+  fsImportPromise = import('node:fs').then(module => {
+    fsModule = module;
+    return module;
+  }).catch(error => {
+    console.warn('Failed to import node:fs, filesystem operations will not be available:', error);
+    throw new Error('Filesystem access is not available in this environment (React Native, browser, or failed Node.js import)');
+  });
+  
+  return fsImportPromise;
 };
 
 const toASCII = (domain: string): string => {
@@ -35,8 +46,8 @@ const toASCII = (domain: string): string => {
   }
 };
 
-export const readLogFromDisk = (path: string): DIDLog => {
-  const fs = getFS();
+export const readLogFromDisk = async (path: string): Promise<DIDLog> => {
+  const fs = await getFS();
   return readLogFromString(fs.readFileSync(path, 'utf8'));
 }
 
@@ -44,8 +55,8 @@ export const readLogFromString = (str: string): DIDLog => {
   return str.trim().split('\n').map(l => JSON.parse(l));
 }
 
-export const writeLogToDisk = (path: string, log: DIDLog) => {
-  const fs = getFS();
+export const writeLogToDisk = async (path: string, log: DIDLog) => {
+  const fs = await getFS();
   try {
     const dir = path.substring(0, path.lastIndexOf('/'));
     if (!fs.existsSync(dir)) {
@@ -63,18 +74,18 @@ export const writeLogToDisk = (path: string, log: DIDLog) => {
   }
 }
 
-export const maybeWriteTestLog = (did: string, log: DIDLog) => {
+export const maybeWriteTestLog = async (did: string, log: DIDLog) => {
   if (!config.isTestEnvironment) return;
   try {
     const fileSafe = did.replace(/[^a-zA-Z0-9]+/g, '_');
     const path = `./test/logs/${fileSafe}.jsonl`;
-    writeLogToDisk(path, log);
+    await writeLogToDisk(path, log);
   } catch (error) {
     console.error('Error writing test log:', error);
   }
 };
 
-export const writeVerificationMethodToEnv = (verificationMethod: VerificationMethod) => {
+export const writeVerificationMethodToEnv = async (verificationMethod: VerificationMethod) => {
   const envFilePath = process.cwd() + '/.env';
   
   const vmData = {
@@ -85,7 +96,7 @@ export const writeVerificationMethodToEnv = (verificationMethod: VerificationMet
     secretKeyMultibase: verificationMethod.secretKeyMultibase || ''
   };
 
-  const fs = getFS();
+  const fs = await getFS();
   try {
     let envContent = '';
     let existingData: any[] = [];
@@ -180,7 +191,7 @@ export async function fetchLogFromIdentifier(identifier: string, controlled: boo
         if (typeof Bun !== 'undefined' && Bun.file) {
           text = (await Bun.file(logPath).text()).trim();
         } else if (isNodeEnvironment) {
-          const fs = getFS();
+          const fs = await getFS();
           text = fs.readFileSync(logPath, 'utf8').trim();
         } else {
           throw new Error('Local log retrieval not supported in this environment');

@@ -38,7 +38,7 @@ export interface DIDResolutionMeta {
   portable: boolean;
   nextKeyHashes: string[];
   deactivated: boolean;
-  witness?: WitnessParameter | undefined | null;
+  witness?: WitnessParameterResolution | undefined | null;
   watchers?: string[] | null;
   error?: 'NOT_FOUND' | 'INVALID_DID' | 'INVALID_DID_URL' | 'INVALID_OPTIONS' | 'REPRESENTATION_NOT_SUPPORTED' | 'METHOD_NOT_SUPPORTED' | 'UNSUPPORTED_PUBLIC_KEY_TYPE' | 'INVALID_DID_DOCUMENT' | 'INVALID_PUBLIC_KEY' | 'INVALID_PUBLIC_KEY_LENGTH' | 'INVALID_PUBLIC_KEY_TYPE' | 'INTERNAL_ERROR';
   problemDetails?: ProblemDetails;
@@ -75,7 +75,12 @@ export interface WitnessEntry {
 }
 
 export interface WitnessParameter {
-  threshold: string;
+  threshold: number;
+  witnesses: WitnessEntry[];
+}
+
+export interface WitnessParameterResolution {
+  threshold: string | number;
   witnesses: WitnessEntry[];
 }
 

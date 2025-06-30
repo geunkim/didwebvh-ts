@@ -1,7 +1,7 @@
 import { clone, createDate, createDIDDoc, createSCID, deriveHash, findVerificationMethod, getActiveDIDs, getBaseUrl } from "../utils";
 import {METHOD, PLACEHOLDER } from '../constants';
 import { documentStateIsValid, hashChainValid, newKeysAreInNextKeys, scidIsFromHash } from '../assertions';
-import type { CreateDIDInterface, DIDResolutionMeta, DIDLogEntry, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry } from '../interfaces';
+import type { CreateDIDInterface, DIDResolutionMeta, DIDLogEntry, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry, WitnessParameterResolution } from '../interfaces';
 import { verifyWitnessProofs, validateWitnessParameter, fetchWitnessProofs } from '../witness';
 
 const VERSION = '0.5';
@@ -62,6 +62,11 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
     throw new Error(`version ${prelimEntry.versionId} is invalid.`)
   }
 
+  let witness: WitnessParameterResolution | null = null;
+  if (params.witness) {
+    witness = {...params.witness, threshold: params.witness.threshold.toString()};
+  }
+
   return {
     did: prelimEntry.state.id!,
     doc: prelimEntry.state,
@@ -70,7 +75,8 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
       created: prelimEntry.versionTime,
       updated: prelimEntry.versionTime,
       prerotation: (params.nextKeyHashes?.length ?? 0) > 0,
-      ...params
+      ...params,
+      witness: witness
     },
     log: [
       prelimEntry

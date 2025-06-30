@@ -127,7 +127,7 @@ describe("did:webvh normative witness tests", async () => {
       verificationMethods: [authKey1],
       verifier: testImplementation,
       witness: {
-        threshold: "2",
+        threshold: 2,
         witnesses: [
           { id: `did:key:${witness1.publicKeyMultibase}` },
           { id: `did:key:${witness2.publicKeyMultibase}` },
@@ -147,7 +147,7 @@ describe("did:webvh normative witness tests", async () => {
         verificationMethods: [authKey1],
         verifier: testImplementation,
         witness: {
-          threshold: "2",
+          threshold: 2,
           witnesses: [
             { id: "did:web:example.com" }, // Invalid - not did:key
             { id: `did:key:${witness1.publicKeyMultibase}` }

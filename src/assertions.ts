@@ -3,7 +3,7 @@ import { canonicalize } from 'json-canonicalize';
 import { createHash } from './utils/crypto';
 import { config } from './config';
 import { concatBuffers } from './utils/buffer';
-import { WitnessParameter, Verifier } from './interfaces';
+import { WitnessParameter, Verifier, WitnessParameterResolution } from './interfaces';
 import { validateWitnessParameter } from './witness';
 import { multibaseDecode } from "./utils/multiformats";
 
@@ -41,7 +41,7 @@ const isWitnessAuthorized = (verificationMethod: string, witnesses: string[]): b
 export const documentStateIsValid = async (
   doc: any, 
   updateKeys: string[], 
-  witness: WitnessParameter | undefined | null,
+  witness: WitnessParameterResolution | undefined | null,
   skipWitnessVerification?: boolean,
   verifier?: Verifier
 ) => {

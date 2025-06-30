@@ -1,17 +1,17 @@
 import { canonicalize } from 'json-canonicalize';
 import { createHash } from './utils/crypto';
-import type { DataIntegrityProof, DIDLogEntry, WitnessEntry, WitnessParameter, WitnessProofFileEntry, Verifier } from './interfaces';
+import type { DataIntegrityProof, DIDLogEntry, WitnessEntry, WitnessParameter, WitnessProofFileEntry, Verifier, WitnessParameterResolution } from './interfaces';
 import { resolveVM } from "./utils";
 import { concatBuffers } from './utils/buffer';
 import { fetchWitnessProofs } from './utils';
 import { multibaseDecode } from './utils/multiformats';
 
-export function validateWitnessParameter(witness: WitnessParameter): void {
+export function validateWitnessParameter(witness: WitnessParameterResolution): void {
   if (!witness.witnesses || !Array.isArray(witness.witnesses) || witness.witnesses.length === 0) {
     throw new Error('Witness list cannot be empty');
   }
 
-  if (!witness.threshold || parseInt(witness.threshold) < 1 || parseInt(witness.threshold) > witness.witnesses.length) {
+  if (!witness.threshold || parseInt(witness.threshold.toString()) < 1 || parseInt(witness.threshold.toString()) > witness.witnesses.length) {
     throw new Error('Witness threshold must be between 1 and the number of witnesses');
   }
 
@@ -46,7 +46,7 @@ export function calculateWitnessWeight(proofs: DataIntegrityProof[], witnesses: 
 export async function verifyWitnessProofs(
   logEntry: DIDLogEntry,
   witnessProofs: WitnessProofFileEntry[],
-  currentWitness: WitnessParameter,
+  currentWitness: WitnessParameterResolution,
   verifier?: Verifier
 ): Promise<void> {
   if (!verifier) {
@@ -161,7 +161,7 @@ export async function verifyWitnessProofs(
     }
   }
 
-  if (approvals < parseInt(currentWitness.threshold)) {
+  if (approvals < parseInt(currentWitness.threshold.toString())) {
     throw new Error(`Witness threshold not met: got ${approvals}, need ${currentWitness.threshold}`);
   }
 }

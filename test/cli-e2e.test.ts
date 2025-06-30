@@ -1,10 +1,9 @@
-import { describe, expect, test, beforeAll, afterAll, it } from "bun:test";
+import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import fs from 'node:fs';
 import { join } from 'path';
-import { readLogFromDisk, readLogFromString } from "../src/utils";
+import { readLogFromDisk } from "../src/utils";
 import { $ } from "bun";
 import { resolveDIDFromLog } from "../src/method";
-import { generateEd25519VerificationMethod } from "../src/cryptography";
 import { generateTestVerificationMethod } from "./utils";
 
 // Set environment variables for tests
@@ -297,7 +296,7 @@ describe("Witness CLI End-to-End Tests", async () => {
       
       expect(log[0].parameters.witness.witnesses).toHaveLength(1);
       expect(log[0].parameters.witness.witnesses[0].id).toBe(witnessDIDKey);
-      expect(log[0].parameters.witness.threshold).toBe("1");
+      expect(log[0].parameters.witness.threshold).toBe(1);
     } catch (error) {
       console.error('Error in witness test:', error);
       throw error;

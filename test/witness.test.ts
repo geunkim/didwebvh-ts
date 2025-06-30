@@ -28,7 +28,7 @@ describe("Witness Implementation Tests", async () => {
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods: [authKey],
       witness: {
-        threshold: "2",
+        threshold: 2,
         witnesses: [
           { id: `did:key:${witness1.publicKeyMultibase}` },
           { id: `did:key:${witness2.publicKeyMultibase}` }
@@ -37,6 +37,7 @@ describe("Witness Implementation Tests", async () => {
       verifier: testImplementation
     });
 
+    console.log('initialDID.log', initialDID.log);
     const resolved = await resolveDIDFromLog(initialDID.log, { verifier: testImplementation });
     expect(resolved.meta?.witness?.threshold).toBe("2");
     expect(resolved.meta?.witness?.witnesses).toHaveLength(2);
@@ -84,7 +85,7 @@ describe("Witness Implementation Tests", async () => {
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods: [authKey],
       witness: {
-        threshold: "1",
+        threshold: 1,
         witnesses: [
           { id: `did:key:${newWitness.publicKeyMultibase}` }
         ]

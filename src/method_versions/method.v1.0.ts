@@ -285,7 +285,9 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
   const finalDoc = resolvedDoc || lastValidDoc;
   const finalMeta = resolvedMeta || lastValidMeta;
   finalMeta.latestVersionId = lastValidMeta.versionId;
-
+  if (finalMeta.witness) {
+    finalMeta.witness.threshold = finalMeta.witness.threshold.toString();
+  }
   return {did: finalDoc.id, doc: finalDoc, meta: finalMeta};
 }
 

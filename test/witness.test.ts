@@ -28,7 +28,7 @@ describe("Witness Implementation Tests", async () => {
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods: [authKey],
       witness: {
-        threshold: 2,
+        threshold: "2",
         witnesses: [
           { id: `did:key:${witness1.publicKeyMultibase}` },
           { id: `did:key:${witness2.publicKeyMultibase}` }
@@ -38,7 +38,7 @@ describe("Witness Implementation Tests", async () => {
     });
 
     const resolved = await resolveDIDFromLog(initialDID.log, { verifier: testImplementation });
-    expect(resolved.meta?.witness?.threshold).toBe(2);
+    expect(resolved.meta?.witness?.threshold).toBe("2");
     expect(resolved.meta?.witness?.witnesses).toHaveLength(2);
   });
 
@@ -72,7 +72,7 @@ describe("Witness Implementation Tests", async () => {
     } as any);
 
     const resolved = await resolveDIDFromLog(updatedDID.log, { verifier: testImplementation });
-    expect(resolved.meta?.witness?.threshold).toBe(2);
+    expect(resolved.meta?.witness?.threshold).toBe("2");
   });
 
   test("Replace witness list with new witnesses", async () => {
@@ -84,7 +84,7 @@ describe("Witness Implementation Tests", async () => {
       updateKeys: [authKey.publicKeyMultibase!],
       verificationMethods: [authKey],
       witness: {
-        threshold: 1,
+        threshold: "1",
         witnesses: [
           { id: `did:key:${newWitness.publicKeyMultibase}` }
         ]
@@ -94,7 +94,7 @@ describe("Witness Implementation Tests", async () => {
 
     const resolved = await resolveDIDFromLog(updatedDID.log, { verifier: testImplementation });
     expect(resolved.meta?.witness?.witnesses).toHaveLength(1);
-    expect(resolved.meta?.witness?.threshold).toBe(1);
+    expect(resolved.meta?.witness?.threshold).toBe("1");
   });
 
   test("Disable witnessing by setting witness list to null", async () => {

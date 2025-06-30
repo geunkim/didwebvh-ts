@@ -101,7 +101,7 @@ export async function handleCreate(args: string[]) {
   const nextKeyHashes = options['next-key-hash'] as string[] | undefined;
   const witnesses = options['witness'] as string[] | undefined;
   const watchers = options['watcher'] as string[] | undefined;
-  const witnessThreshold = options['witness-threshold'] ? parseInt(options['witness-threshold'] as string) : witnesses?.length ?? 0;
+  const witnessThreshold = options['witness-threshold'] ? options['witness-threshold'] as string : witnesses?.length?.toString() ?? '0';
 
   if (!domain) {
     console.error('Domain is required for create command');
@@ -199,7 +199,7 @@ export async function handleUpdate(args: string[]) {
   const logFile = options['log'] as string;
   const output = options['output'] as string | undefined;
   const witnesses = options['witness'] as string[] | undefined;
-  const witnessThreshold = options['witness-threshold'] ? parseInt(options['witness-threshold'] as string) : undefined;
+  const witnessThreshold = options['witness-threshold'] ? options['witness-threshold'] as string : undefined;
   const services = options['service'] ? parseServices(options['service'] as string[]) : undefined;
   const addVm = options['add-vm'] as string[] | undefined;
   const alsoKnownAs = options['also-known-as'] as string[] | undefined;
@@ -276,7 +276,7 @@ export async function handleUpdate(args: string[]) {
       verificationMethods,
       witness: witnesses?.length ? {
         witnesses: witnesses.map(witness => ({id: witness})),
-        threshold: witnessThreshold ?? witnesses.length
+        threshold: witnessThreshold ?? witnesses.length.toString()
       } : undefined,
       watchers: watchers ?? undefined,
       services,

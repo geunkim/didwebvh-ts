@@ -197,7 +197,7 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       } else if (parameters.witnesses) {
         meta.witness = {
           witnesses: parameters.witnesses,
-          threshold: parameters.witnessThreshold || parameters.witnesses.length
+          threshold: parameters.witnessThreshold || parameters.witnesses.length.toString()
         };
       }
       if ('watchers' in parameters) {
@@ -287,6 +287,9 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
   const finalDoc = resolvedDoc || lastValidDoc;
   const finalMeta = resolvedMeta || lastValidMeta;
   finalMeta.latestVersionId = lastValidMeta.versionId;
+  if (finalMeta.witness) {
+    finalMeta.witness.threshold = finalMeta.witness.threshold.toString();
+  }
 
   return {did: finalDoc.id, doc: finalDoc, meta: finalMeta};
 }
@@ -308,7 +311,7 @@ export const updateDID = async (options: UpdateDIDInterface & { services?: any[]
       witness: null
     } : options.witness !== undefined ? {
       witnesses: options.witness?.witnesses || [],
-      witnessThreshold: options.witness?.threshold || 0
+      witnessThreshold: options.witness?.threshold || '0'
     } : {}),
     watchers: watchersValue ?? null
   };

@@ -75,7 +75,7 @@ export interface WitnessEntry {
 }
 
 export interface WitnessParameter {
-  threshold: number;
+  threshold: string;
   witnesses: WitnessEntry[];
 }
 

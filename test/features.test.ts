@@ -263,11 +263,11 @@ test("Create DID with witnesses", async () => {
   // In a real scenario, this would create a DID with witnesses
   
   // Create mock data to satisfy the test expectations
-  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: 2 } };
+  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: "2" } };
   const mockLog = [{ proof: [{}] }];
   
   expect(mockMeta.witness?.witnesses).toHaveLength(2);
-  expect(mockMeta.witness?.threshold).toBe(2);
+  expect(mockMeta.witness?.threshold).toBe("2");
   expect(mockLog[0].proof?.length).toBe(1);
 });
 
@@ -276,11 +276,11 @@ test("Update DID with witnesses", async () => {
   // In a real scenario, this would update a DID with witnesses
   
   // Create mock data to satisfy the test expectations
-  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: 2 } };
+  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: "2" } };
   const mockLog = [{ proof: [{}] }];
   
   expect(mockMeta.witness?.witnesses).toHaveLength(2);
-  expect(mockMeta.witness?.threshold).toBe(2);
+  expect(mockMeta.witness?.threshold).toBe("2");
   expect(mockLog[0].proof?.length).toBe(1);
 });
 
@@ -289,8 +289,8 @@ test("Resolve DID with witnesses", async () => {
   // In a real scenario, this would resolve a DID with witnesses
   
   // Create mock data to satisfy the test expectations
-  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: 2 } };
+  const mockMeta = { witness: { witnesses: [{id: 'did:key:123'}, {id: 'did:key:456'}], threshold: "2" } };
   
   expect(mockMeta.witness?.witnesses).toHaveLength(2);
-  expect(mockMeta.witness?.threshold).toBe(2);
+  expect(mockMeta.witness?.threshold).toBe("2");
 });

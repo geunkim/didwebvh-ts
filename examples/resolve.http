@@ -2,9 +2,6 @@
 ### Health check resolver
 GET http://localhost:3010/health
 
-### Resolve the DID with Elysia resolver
-GET http://localhost:3010/resolve/did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:gist.githubusercontent.com:brianorwhatever:9c4633d18eb644f7a47f93a802691626:raw
-
 ### Resolve the DID with resolver
 GET http://localhost:3010/resolve/did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:gist.githubusercontent.com:brianorwhatever:9c4633d18eb644f7a47f93a802691626:raw 
 
@@ -14,4 +11,4 @@ GET http://localhost:3010/resolve/did:webvh:potato:gist.githubusercontent.com:br
 
 ### 200
 
-GET http://localhost:3010/resolve/did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:gist.githubusercontent.com:brianorwhatever:9c4633d18eb644f7a47f93a802691626:raw
+GET http://localhost:3010/resolve/did:webvh:QmVJ5nUYb9iugnUz4yDfbe8UFbhmnsvS2EAzSpSfPScRAn:opsecid.github.io

@@ -11,7 +11,7 @@ export function validateWitnessParameter(witness: WitnessParameter): void {
     throw new Error('Witness list cannot be empty');
   }
 
-  if (!witness.threshold || witness.threshold < 1 || witness.threshold > witness.witnesses.length) {
+  if (!witness.threshold || parseInt(witness.threshold) < 1 || parseInt(witness.threshold) > witness.witnesses.length) {
     throw new Error('Witness threshold must be between 1 and the number of witnesses');
   }
 
@@ -161,7 +161,7 @@ export async function verifyWitnessProofs(
     }
   }
 
-  if (approvals < currentWitness.threshold) {
+  if (approvals < parseInt(currentWitness.threshold)) {
     throw new Error(`Witness threshold not met: got ${approvals}, need ${currentWitness.threshold}`);
   }
 }

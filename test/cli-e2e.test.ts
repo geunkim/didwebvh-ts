@@ -297,7 +297,7 @@ describe("Witness CLI End-to-End Tests", async () => {
       
       expect(log[0].parameters.witness.witnesses).toHaveLength(1);
       expect(log[0].parameters.witness.witnesses[0].id).toBe(witnessDIDKey);
-      expect(log[0].parameters.witness.threshold).toBe(1);
+      expect(log[0].parameters.witness.threshold).toBe("1");
     } catch (error) {
       console.error('Error in witness test:', error);
       throw error;

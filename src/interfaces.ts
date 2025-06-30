@@ -17,7 +17,7 @@ export interface Verifier {
 }
 
 export interface SignerOptions {
-  verificationMethod: VerificationMethod;
+  verificationMethod?: VerificationMethod | null;
   useStaticId?: boolean;
 }
 

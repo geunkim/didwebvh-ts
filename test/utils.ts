@@ -27,7 +27,7 @@ export class TestCryptoImplementation extends AbstractCrypto implements Verifier
   constructor(options: SignerOptions) {
     super(options);
     // For tests, we'll generate a deterministic key if none provided
-    if (!options.verificationMethod.secretKeyMultibase) {
+    if (!options.verificationMethod?.secretKeyMultibase) {
       const keyPair = crypto.generateKeyPair();
       this.keyPair = keyPair;
     } else {

@@ -45,7 +45,9 @@ export const documentStateIsValid = async (
   skipWitnessVerification?: boolean,
   verifier?: Verifier
 ) => {
-  if (config.getEnvValue('IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID') === 'true') return true;
+  if (config.getEnvValue('IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID') === 'true') {
+    return true;
+  }
   
   if (!verifier) {
     throw new Error('Verifier implementation is required');
@@ -110,7 +112,7 @@ export const documentStateIsValid = async (
     );
     
     if (!verified) {
-      throw new Error(`Proof ${i} failed verification`);
+      throw new Error(`Proof ${i} failed verification (proofValue: ${proofValue})`);
     }
   }
   return true;

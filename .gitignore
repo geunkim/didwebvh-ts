@@ -9,3 +9,4 @@ claude_chats
 did.json
 dist/
 *.tsbuildinfo
+benchmarks

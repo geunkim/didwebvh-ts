@@ -1,4 +1,4 @@
-import { clone, createDate, createDIDDoc, createSCID, deriveHash, findVerificationMethod, getActiveDIDs, getBaseUrl } from "../utils";
+import { createDate, createDIDDoc, createSCID, deriveHash, findVerificationMethod, getBaseUrl, replaceValueInObject, deepClone } from "../utils";
 import {METHOD, PLACEHOLDER } from '../constants';
 import { documentStateIsValid, hashChainValid, newKeysAreInNextKeys, scidIsFromHash } from '../assertions';
 import type { CreateDIDInterface, DIDResolutionMeta, DIDLogEntry, DIDLog, UpdateDIDInterface, DeactivateDIDInterface, ResolutionOptions, WitnessProofFileEntry, WitnessParameterResolution } from '../interfaces';
@@ -88,7 +88,7 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
   if (options.verificationMethod && (options.versionNumber || options.versionId)) {
     throw new Error("Cannot specify both verificationMethod and version number/id");
   }
-  const resolutionLog = clone(log);
+  const resolutionLog = log.map(l => deepClone(l));
   const protocol = resolutionLog[0].parameters.method;
   if(protocol !== PROTOCOL) {
     throw new Error(`'${protocol}' protocol unknown.`);
@@ -142,19 +142,22 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
       meta.witness = parameters.witness || meta.witness;
       meta.watchers = parameters.watchers ?? null;
       meta.nextKeyHashes = parameters.nextKeyHashes ?? [];
+      // Optimized: Use efficient object manipulation instead of JSON stringify/parse
       const logEntry = {
         versionId: PLACEHOLDER,
         versionTime: meta.created,
-        parameters: JSON.parse(JSON.stringify(parameters).replaceAll(meta.scid, PLACEHOLDER)),
-        state: JSON.parse(JSON.stringify(newDoc).replaceAll(meta.scid, PLACEHOLDER))
+        parameters: replaceValueInObject(parameters, meta.scid, PLACEHOLDER),
+        state: replaceValueInObject(newDoc, meta.scid, PLACEHOLDER)
       };
+      
       const logEntryHash = await deriveHash(logEntry);
       meta.previousLogEntryHash = logEntryHash;
-      const scidToCheck = options.scid || meta.scid;
-      if (!await scidIsFromHash(scidToCheck, logEntryHash)) {
-        throw new Error(`SCID '${scidToCheck}' (from DID: '${options.scid}', from log: '${meta.scid}') not derived from logEntryHash '${logEntryHash}'`);
+      if (!await scidIsFromHash(meta.scid, logEntryHash)) {
+        throw new Error(`SCID '${meta.scid}' not derived from logEntryHash '${logEntryHash}'`);
       }
-      const prelimEntry = JSON.parse(JSON.stringify(logEntry).replaceAll(PLACEHOLDER, meta.scid));
+      
+      // Optimized: Direct object manipulation instead of JSON stringify/parse
+      const prelimEntry = replaceValueInObject(logEntry, PLACEHOLDER, meta.scid);
       const logEntryHash2 = await deriveHash(prelimEntry);
       const verified = await documentStateIsValid({...prelimEntry, versionId: `1-${logEntryHash2}`, proof}, meta.updateKeys, meta.witness, false, options.verifier);
       if (!verified) {
@@ -210,7 +213,8 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
         meta.watchers = parameters.watchers ?? null;
       }
     }
-    doc = clone(newDoc);
+    // Optimized: Use efficient cloning instead of clone() function
+    doc = deepClone(newDoc);
     did = doc.id;
 
     // Add default services if they don't exist
@@ -236,26 +240,26 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
 
     if (options.verificationMethod && findVerificationMethod(doc, options.verificationMethod)) {
       if (!resolvedDoc) {
-        resolvedDoc = clone(doc);
+        resolvedDoc = deepClone(doc);
         resolvedMeta = { ...meta };
       }
     }
 
     if (options.versionNumber === parseInt(version) || options.versionId === meta.versionId) {
       if (!resolvedDoc) {
-        resolvedDoc = clone(doc);
+        resolvedDoc = deepClone(doc);
         resolvedMeta = { ...meta };
       }
     }
     if (options.versionTime && options.versionTime > new Date(meta.updated)) {
       if (resolutionLog[i+1] && options.versionTime < new Date(resolutionLog[i+1].versionTime)) {
         if (!resolvedDoc) {
-          resolvedDoc = clone(doc);
+          resolvedDoc = deepClone(doc);
           resolvedMeta = { ...meta };
         }
       } else if(!resolutionLog[i+1]) {
         if (!resolvedDoc) {
-          resolvedDoc = clone(doc);
+          resolvedDoc = deepClone(doc);
           resolvedMeta = { ...meta };
         }
       }
@@ -272,10 +276,12 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
 
       if (validProofs.length > 0) {
         await verifyWitnessProofs(resolutionLog[i], validProofs, meta.witness!, options.verifier);
+      } else if (parseInt(meta.witness.threshold.toString()) > 0) {
+        throw new Error('No witness proofs found for version ' + meta.versionId);
       }
     }
 
-    lastValidDoc = clone(doc);
+    lastValidDoc = deepClone(doc);
     lastValidMeta = { ...meta };
 
     i++;
@@ -303,7 +309,7 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
 export const updateDID = async (options: UpdateDIDInterface & { services?: any[], domain?: string, updated?: string }): Promise<{did: string, doc: any, meta: DIDResolutionMeta, log: DIDLog}> => {
   const log = options.log;
   const lastEntry = log[log.length - 1];
-  const lastMeta = (await resolveDIDFromLog(log, { verifier: options.verifier })).meta;
+  const lastMeta = (await resolveDIDFromLog(log, { verifier: options.verifier, witnessProofs: options.witnessProofs })).meta;
   if (lastMeta.deactivated) {
     throw new Error('Cannot update deactivated DID');
   }

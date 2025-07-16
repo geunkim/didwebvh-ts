@@ -106,15 +106,15 @@ describe("resolveDIDFromLog with verificationMethod", () => {
     let error: Error | null = null;
     
     try {
-      await resolveDIDFromLog(fullLog, { 
+      const resolved = await resolveDIDFromLog(fullLog, { 
         verificationMethod: vmId, 
         versionNumber: 2,
         verifier: testImplementation
       });
+      console.log('resolved', resolved);
     } catch (e) {
       error = e as Error;
     }
-
     expect(error).not.toBeNull();
     expect(error?.message).toBe("Cannot specify both verificationMethod and version number/id");
   });

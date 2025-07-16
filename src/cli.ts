@@ -4,13 +4,14 @@ import { createDID, updateDID, deactivateDID, resolveDIDFromLog } from './method
 import { fetchLogFromIdentifier, readLogFromDisk, writeLogToDisk, writeVerificationMethodToEnv } from './utils';
 import { dirname } from 'path';
 import fs from 'fs';
-import { DIDLog, ServiceEndpoint, VerificationMethod } from './interfaces';
+import { DIDLog, ServiceEndpoint, VerificationMethod, Verifier } from './interfaces';
 import { createBuffer } from './utils/buffer';
 import { bufferToString } from './utils/buffer';
 import crypto from 'crypto';
 import { Signer, SigningInput, SigningOutput } from './interfaces';
 import { multibaseEncode } from './utils/multiformats';
 import { MultibaseEncoding } from './utils/multiformats';
+import { verify as ed25519Verify } from '@stablelib/ed25519';
 
 const usage = `
 Usage: bun run cli [command] [options]
@@ -33,10 +34,12 @@ Options:
   --add-vm [type]           Add a verification method (type can be authentication, assertionMethod, keyAgreement, capabilityInvocation, capabilityDelegation)
   --also-known-as [alias]   Add an alsoKnownAs alias (can be used multiple times)
   --next-key-hash [hash]    Add a nextKeyHash (can be used multiple times)
+  --witness-file [file]     Path to witness proofs file (optional for resolve)
 
 Examples:
   bun run cli create --domain example.com --portable --witness did:example:witness1 --witness did:example:witness2
   bun run cli resolve --did did:webvh:123456:example.com
+  bun run cli resolve --log ./did.jsonl --witness-file ./did-witness.json
   bun run cli update --log ./did.jsonl --output ./updated-did.jsonl --add-vm keyAgreement --service LinkedDomains,https://example.com
   bun run cli deactivate --log ./did.jsonl --output ./deactivated-did.jsonl
 `;
@@ -90,6 +93,12 @@ class CustomCryptoImplementation implements Signer {
 // Helper function to create a signer from a verification method
 function createCustomSigner(verificationMethod: VerificationMethod): Signer {
   return new CustomCryptoImplementation(verificationMethod);
+}
+
+class CliVerifier implements Verifier {
+  async verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+    return ed25519Verify(publicKey, message, signature);
+  }
 }
 
 // Export the handler functions for testing
@@ -167,6 +176,7 @@ export async function handleResolve(args: string[]) {
   const options = parseOptions(args);
   const didIdentifier = options['did'] as string;
   const logFile = options['log'] as string;
+  const witnessFile = options['witness-file'] as string | undefined;
 
   if (!didIdentifier && !logFile) {
     console.error('Either --did or --log is required for resolve command');
@@ -181,11 +191,21 @@ export async function handleResolve(args: string[]) {
       log = await fetchLogFromIdentifier(didIdentifier);
     }
 
-    const { did, doc, meta } = await resolveDIDFromLog(log);
+    let resolutionOptions: any = {};
+    if (witnessFile) {
+      const witnessProofs = JSON.parse(fs.readFileSync(witnessFile, 'utf8'));
+      resolutionOptions.witnessProofs = witnessProofs;
+    }
+    const verifier = new CliVerifier();
+    resolutionOptions.verifier = verifier;
+
+    console.time('Resolution time');
+    const { did, doc, meta } = await resolveDIDFromLog(log, resolutionOptions);
+    console.timeEnd('Resolution time');
 
     console.log('Resolved DID:', did);
     console.log('DID Document:', JSON.stringify(doc, null, 2));
-    console.log('Metadata:', meta);
+    console.log('Metadata:', JSON.stringify(meta, null, 2));
 
     return { did, doc, meta };
   } catch (error) {

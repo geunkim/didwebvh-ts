@@ -150,6 +150,18 @@ export const writeVerificationMethodToEnv = async (verificationMethod: Verificat
 
 export const clone = (input: any) => JSON.parse(JSON.stringify(input));
 
+export function deepClone(obj: any): any {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (obj instanceof Date) return new Date(obj.getTime());
+  if (Array.isArray(obj)) return obj.map(item => deepClone(item));
+  
+  const cloned: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    cloned[key] = deepClone(value);
+  }
+  return cloned;
+}
+
 export const getBaseUrl = (id: string) => {
   const parts = id.split(':');
   if (!id.startsWith('did:webvh:') || parts.length < 4) {
@@ -236,11 +248,39 @@ export const createSCID = async (logEntryHash: string): Promise<string> => {
   return logEntryHash;
 }
 
-export const deriveHash = async (input: any): Promise<string> => {
+// Cache for deriveHash operations to avoid redundant computation
+const hashCache = new Map<string, string>();
+
+function getCachedHash(input: any): string | undefined {
+  try {
+    const key = JSON.stringify(input);
+    return hashCache.get(key);
+  } catch {
+    return undefined;
+  }
+}
+
+function setCachedHash(input: any, hash: string): void {
+  try {
+    const key = JSON.stringify(input);
+    hashCache.set(key, hash);
+  } catch {
+    // Ignore caching errors
+  }
+}
+
+export async function deriveHash(input: any): Promise<string> {
+  const cached = getCachedHash(input);
+  if (cached) {
+    return cached;
+  }
+  
   const data = canonicalize(input);
   const hash = await createHash(data);
   const multihash = createMultihash(new Uint8Array(hash), MultihashAlgorithm.SHA2_256);
-  return encodeBase58Btc(multihash);
+  const result = encodeBase58Btc(multihash);
+  setCachedHash(input, result);
+  return result;
 }
 
 export const deriveNextKeyHash = async (input: string): Promise<string> => {
@@ -433,4 +473,21 @@ export async function fetchWitnessProofs(did: string): Promise<WitnessProofFileE
     console.error('Error fetching witness proofs:', error);
     return [];
   }
+}
+
+export function replaceValueInObject(obj: any, searchValue: string, replaceValue: string): any {
+  if (typeof obj === 'string') {
+    return obj.replaceAll(searchValue, replaceValue);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => replaceValueInObject(item, searchValue, replaceValue));
+  }
+  if (obj && typeof obj === 'object') {
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = replaceValueInObject(value, searchValue, replaceValue);
+    }
+    return result;
+  }
+  return obj;
 }

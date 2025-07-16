@@ -161,6 +161,7 @@ export interface UpdateDIDInterface {
   authentication?: string[];
   assertionMethod?: string[];
   keyAgreement?: string[];
+  witnessProofs?: WitnessProofFileEntry[];
 }
 
 export interface DeactivateDIDInterface {

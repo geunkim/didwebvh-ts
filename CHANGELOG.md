@@ -1,3 +1,17 @@
+# [2.4.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.2...v2.4.0) (2025-07-16)
+
+
+### Bug Fixes
+
+* update witness parameter handling and types ([c783641](https://github.com/decentralized-identity/didwebvh-ts/commit/c783641ad318565923fcfcd896ab44370c39363f))
+
+
+### Features
+
+* enhance cryptographic interface and implementation ([a37c99b](https://github.com/decentralized-identity/didwebvh-ts/commit/a37c99b7bf1d53ba607f1038c21c3265ff05f091))
+* enhance witness handling and resolution logic ([cb453a8](https://github.com/decentralized-identity/didwebvh-ts/commit/cb453a852cfcab2b474bf1c650f41362bd31f2b2))
+* implement witness proof generation and enhance CLI functionality ([84bbc4f](https://github.com/decentralized-identity/didwebvh-ts/commit/84bbc4f79140c102af54a0a7d91ff1a7725ed048))
+
 ## [2.3.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.1...v2.3.2) (2025-06-24)
 
 

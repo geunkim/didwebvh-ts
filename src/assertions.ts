@@ -58,7 +58,7 @@ export const documentStateIsValid = async (
     proofs = [proofs];
   }
 
-  if (witness && witness.witnesses.length > 0) {
+  if (witness && witness.witnesses && witness.witnesses.length > 0) {
     if (!skipWitnessVerification) {
       validateWitnessParameter(witness);
     }
@@ -72,7 +72,7 @@ export const documentStateIsValid = async (
         throw new Error(`Key ${proof.verificationMethod} is not authorized to update.`);
       }
     } else if (proof.verificationMethod.startsWith('did:webvh:')) {
-      if (witness && witness.witnesses.length > 0 && !isWitnessAuthorized(proof.verificationMethod, witness.witnesses.map((w: {id: string}) => w.id))) {
+      if (witness && witness.witnesses && witness.witnesses.length > 0 && !isWitnessAuthorized(proof.verificationMethod, witness.witnesses.map((w: {id: string}) => w.id))) {
         throw new Error(`Key ${proof.verificationMethod} is not from an authorized witness.`);
       }
     } else {

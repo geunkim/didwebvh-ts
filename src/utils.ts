@@ -63,7 +63,7 @@ export const writeLogToDisk = async (path: string, log: DIDLog) => {
   const fs = await getFS();
   try {
     const dir = path.substring(0, path.lastIndexOf('/'));
-    if (!fs.existsSync(dir)) {
+    if (dir && !fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 

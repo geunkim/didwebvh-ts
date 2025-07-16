@@ -83,7 +83,7 @@ export async function verifyWitnessProofs(
         throw new Error('Invalid witness proof cryptosuite');
       }
 
-      const witness = currentWitness.witnesses.find(w => proof.verificationMethod.startsWith(w.id));
+      const witness = currentWitness.witnesses?.find(w => proof.verificationMethod.startsWith(w.id));
       if (!witness) {
         throw new Error('Proof from unauthorized witness');
       }
@@ -152,7 +152,7 @@ export async function verifyWitnessProofs(
     }
   }
 
-  if (approvals < parseInt(currentWitness.threshold.toString())) {
+  if (approvals < parseInt(currentWitness.threshold?.toString() ?? '0')) {
     throw new Error(`Witness threshold not met: got ${approvals}, need ${currentWitness.threshold}`);
   }
 }

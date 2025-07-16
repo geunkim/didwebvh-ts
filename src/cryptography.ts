@@ -120,19 +120,3 @@ export const createSigner = (vm: VerificationMethod, useStatic: boolean = true) 
     }
   };
 };
-
-/**
- * @deprecated Implement your own key generation logic
- */
-export async function generateEd25519VerificationMethod(): Promise<VerificationMethod> {
-  console.warn('generateEd25519VerificationMethod is deprecated. Implement your own key generation logic.');
-  throw new Error('generateEd25519VerificationMethod is deprecated. Implement your own key generation logic.');
-}
-
-/**
- * @deprecated Implement your own key generation logic
- */
-export async function generateX25519VerificationMethod(): Promise<VerificationMethod> {
-  console.warn('generateX25519VerificationMethod is deprecated. Implement your own key generation logic.');
-  throw new Error('generateX25519VerificationMethod is deprecated. Implement your own key generation logic.');
-}

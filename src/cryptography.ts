@@ -1,7 +1,7 @@
 import { createDate } from "./utils";
 import { canonicalize } from 'json-canonicalize';
 import { createHash } from './utils/crypto';
-import type { VerificationMethod, SigningInput, SigningOutput, Signer, SignerOptions } from './interfaces';
+import type { VerificationMethod, SigningInput, SigningOutput, Signer, SignerOptions, Verifier } from './interfaces';
 import { concatBuffers } from './utils/buffer';
 
 /**
@@ -35,12 +35,14 @@ export const prepareDataForSigning = async (document: any, proof: any): Promise<
  * Abstract base class for signers
  * Users should extend this class to implement their own signing logic
  */
-export abstract class AbstractCrypto implements Signer {
-  protected verificationMethod: VerificationMethod;
+export abstract class AbstractCrypto implements Signer, Verifier {
+  protected verificationMethod?: VerificationMethod | null;
   protected useStaticId: boolean;
 
   constructor(options: SignerOptions) {
-    this.verificationMethod = options.verificationMethod;
+    if (options.verificationMethod) {
+      this.verificationMethod = options.verificationMethod;
+    }
     this.useStaticId = options.useStaticId !== undefined ? options.useStaticId : true;
   }
 
@@ -52,10 +54,21 @@ export abstract class AbstractCrypto implements Signer {
   abstract sign(input: SigningInput): Promise<SigningOutput>;
 
   /**
+   * Verify a signature
+   * @param signature - The signature to verify
+   * @param message - The message to verify
+   * @param publicKey - The public key to verify the signature with
+   */
+  abstract verify(signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): Promise<boolean>;
+
+  /**
    * Get the verification method ID
    * @returns The verification method ID
    */
   getVerificationMethodId(): string {
+    if (!this.verificationMethod) {
+      throw new Error('Verification method not set');
+    }
     return this.useStaticId 
       ? `did:key:${this.verificationMethod.publicKeyMultibase}#${this.verificationMethod.publicKeyMultibase}`
       : this.verificationMethod.id || '';
@@ -107,19 +120,3 @@ export const createSigner = (vm: VerificationMethod, useStatic: boolean = true) 
     }
   };
 };
-
-/**
- * @deprecated Implement your own key generation logic
- */
-export async function generateEd25519VerificationMethod(): Promise<VerificationMethod> {
-  console.warn('generateEd25519VerificationMethod is deprecated. Implement your own key generation logic.');
-  throw new Error('generateEd25519VerificationMethod is deprecated. Implement your own key generation logic.');
-}
-
-/**
- * @deprecated Implement your own key generation logic
- */
-export async function generateX25519VerificationMethod(): Promise<VerificationMethod> {
-  console.warn('generateX25519VerificationMethod is deprecated. Implement your own key generation logic.');
-  throw new Error('generateX25519VerificationMethod is deprecated. Implement your own key generation logic.');
-}

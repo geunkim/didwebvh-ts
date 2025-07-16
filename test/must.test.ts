@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { createDID, deactivateDID, resolveDIDFromLog, updateDID } from "../src/method";
 import type { DIDLog, VerificationMethod } from "../src/interfaces";
-import { createWitnessProof } from "../src/utils/witness";
 import { generateTestVerificationMethod, createTestSigner, TestCryptoImplementation } from "./utils";
+import { createWitnessProof } from "../src/witness";
 
 // Set environment variables for tests
 process.env.IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID = 'true';

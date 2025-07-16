@@ -3,7 +3,7 @@ import { canonicalize } from 'json-canonicalize';
 import { createHash } from './utils/crypto';
 import { config } from './config';
 import { concatBuffers } from './utils/buffer';
-import { WitnessParameter, Verifier } from './interfaces';
+import { WitnessParameter, Verifier, WitnessParameterResolution } from './interfaces';
 import { validateWitnessParameter } from './witness';
 import { multibaseDecode } from "./utils/multiformats";
 
@@ -41,11 +41,13 @@ const isWitnessAuthorized = (verificationMethod: string, witnesses: string[]): b
 export const documentStateIsValid = async (
   doc: any, 
   updateKeys: string[], 
-  witness: WitnessParameter | undefined | null,
+  witness: WitnessParameterResolution | undefined | null,
   skipWitnessVerification?: boolean,
   verifier?: Verifier
 ) => {
-  if (config.getEnvValue('IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID') === 'true') return true;
+  if (config.getEnvValue('IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID') === 'true') {
+    return true;
+  }
   
   if (!verifier) {
     throw new Error('Verifier implementation is required');
@@ -56,7 +58,7 @@ export const documentStateIsValid = async (
     proofs = [proofs];
   }
 
-  if (witness && witness.witnesses.length > 0) {
+  if (witness && witness.witnesses && witness.witnesses.length > 0) {
     if (!skipWitnessVerification) {
       validateWitnessParameter(witness);
     }
@@ -70,7 +72,7 @@ export const documentStateIsValid = async (
         throw new Error(`Key ${proof.verificationMethod} is not authorized to update.`);
       }
     } else if (proof.verificationMethod.startsWith('did:webvh:')) {
-      if (witness && witness.witnesses.length > 0 && !isWitnessAuthorized(proof.verificationMethod, witness.witnesses.map((w: {id: string}) => w.id))) {
+      if (witness && witness.witnesses && witness.witnesses.length > 0 && !isWitnessAuthorized(proof.verificationMethod, witness.witnesses.map((w: {id: string}) => w.id))) {
         throw new Error(`Key ${proof.verificationMethod} is not from an authorized witness.`);
       }
     } else {
@@ -110,7 +112,7 @@ export const documentStateIsValid = async (
     );
     
     if (!verified) {
-      throw new Error(`Proof ${i} failed verification`);
+      throw new Error(`Proof ${i} failed verification (proofValue: ${proofValue})`);
     }
   }
   return true;

@@ -1,17 +1,36 @@
 import { canonicalize } from 'json-canonicalize';
 import { createHash } from './utils/crypto';
-import type { DataIntegrityProof, DIDLogEntry, WitnessEntry, WitnessParameter, WitnessProofFileEntry, Verifier } from './interfaces';
+import type { DataIntegrityProof, DIDLogEntry, WitnessEntry, WitnessProofFileEntry, Verifier, WitnessParameterResolution } from './interfaces';
 import { resolveVM } from "./utils";
 import { concatBuffers } from './utils/buffer';
 import { fetchWitnessProofs } from './utils';
 import { multibaseDecode } from './utils/multiformats';
 
-export function validateWitnessParameter(witness: WitnessParameter): void {
+export async function createWitnessProof(
+  signer: (doc: any) => Promise<{proof: any}>,
+  versionId: string
+): Promise<DataIntegrityProof> {
+  const proof = {
+    type: "DataIntegrityProof",
+    cryptosuite: "eddsa-jcs-2022",
+    created: new Date().toISOString(),
+    proofPurpose: "authentication"
+  };
+
+  const signedData = await signer({versionId});
+  
+  return {
+    ...proof,
+    ...signedData.proof
+  };
+}
+
+export function validateWitnessParameter(witness: WitnessParameterResolution): void {
   if (!witness.witnesses || !Array.isArray(witness.witnesses) || witness.witnesses.length === 0) {
     throw new Error('Witness list cannot be empty');
   }
 
-  if (!witness.threshold || witness.threshold < 1 || witness.threshold > witness.witnesses.length) {
+  if (!witness.threshold || parseInt(witness.threshold.toString()) < 1 || parseInt(witness.threshold.toString()) > witness.witnesses.length) {
     throw new Error('Witness threshold must be between 1 and the number of witnesses');
   }
 
@@ -46,7 +65,7 @@ export function calculateWitnessWeight(proofs: DataIntegrityProof[], witnesses: 
 export async function verifyWitnessProofs(
   logEntry: DIDLogEntry,
   witnessProofs: WitnessProofFileEntry[],
-  currentWitness: WitnessParameter,
+  currentWitness: WitnessParameterResolution,
   verifier?: Verifier
 ): Promise<void> {
   if (!verifier) {
@@ -56,21 +75,21 @@ export async function verifyWitnessProofs(
   let approvals = 0;
   const processedWitnesses = new Set<string>();
 
-  // Process each proof set sequentially to avoid race conditions
+  // Process each proof set
   for (const proofSet of witnessProofs) {
-    // Process each proof in the set sequentially
+    // Process each proof in the set
     for (const proof of proofSet.proof) {
       if (proof.cryptosuite !== 'eddsa-jcs-2022') {
         throw new Error('Invalid witness proof cryptosuite');
       }
 
-      const witness = currentWitness.witnesses.find(w => proof.verificationMethod.startsWith(w.id));
+      const witness = currentWitness.witnesses?.find(w => proof.verificationMethod.startsWith(w.id));
       if (!witness) {
         throw new Error('Proof from unauthorized witness');
       }
 
       if (processedWitnesses.has(witness.id)) {
-        continue;
+        continue; // Skip duplicate proofs from same witness
       }
 
       try {
@@ -95,7 +114,7 @@ export async function verifyWitnessProofs(
         // Extract proof value and prepare data for verification
         const { proofValue, ...proofWithoutValue } = proof;
         
-        // Create hashes sequentially to avoid race conditions
+        // Create hashes
         const canonicalizedData = canonicalize({versionId: logEntry.versionId});
         const canonicalizedProof = canonicalize(proofWithoutValue);
         
@@ -113,42 +132,14 @@ export async function verifyWitnessProofs(
           throw new Error(`Failed to decode signature: ${error.message}`);
         }
 
-        // Implement retry mechanism for verification
-        let verified = false;
-        const maxRetries = 3;
-        
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
-          try {
-            verified = await verifier.verify(
-              signature,
-              input,
-              publicKey.slice(2)
-            );
-            
-            if (verified) break;
-            
-            // Add a small delay before retrying
-            if (attempt < maxRetries - 1) {
-              await new Promise(resolve => setTimeout(resolve, 10));
-            }
-          } catch (verifyError: any) {
-            console.error(`Verification attempt ${attempt + 1} failed:`, verifyError);
-            
-            // Only throw on the last attempt
-            if (attempt === maxRetries - 1) {
-              throw verifyError;
-            }
-            
-            // Add a small delay before retrying
-            await new Promise(resolve => setTimeout(resolve, 10));
-          }
-        }
+        // Verify signature
+        const verified = await verifier.verify(
+          signature,
+          input,
+          publicKey.slice(2)
+        );
 
         if (!verified) {
-          console.error('Signature verification failed:');
-          console.error('- Signature:', Buffer.from(signature).toString('hex').substring(0, 30) + '...');
-          console.error('- Message:', Buffer.from(input).toString('hex').substring(0, 30) + '...');
-          console.error('- Public Key:', Buffer.from(publicKey.slice(2)).toString('hex').substring(0, 30) + '...');
           throw new Error('Invalid witness proof signature');
         }
 
@@ -161,7 +152,7 @@ export async function verifyWitnessProofs(
     }
   }
 
-  if (approvals < currentWitness.threshold) {
+  if (approvals < parseInt(currentWitness.threshold?.toString() ?? '0')) {
     throw new Error(`Witness threshold not met: got ${approvals}, need ${currentWitness.threshold}`);
   }
 }

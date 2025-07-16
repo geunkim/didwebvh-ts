@@ -17,7 +17,7 @@ export interface Verifier {
 }
 
 export interface SignerOptions {
-  verificationMethod: VerificationMethod;
+  verificationMethod?: VerificationMethod | null;
   useStaticId?: boolean;
 }
 
@@ -38,7 +38,7 @@ export interface DIDResolutionMeta {
   portable: boolean;
   nextKeyHashes: string[];
   deactivated: boolean;
-  witness?: WitnessParameter | undefined | null;
+  witness?: WitnessParameterResolution;
   watchers?: string[] | null;
   error?: 'NOT_FOUND' | 'INVALID_DID' | 'INVALID_DID_URL' | 'INVALID_OPTIONS' | 'REPRESENTATION_NOT_SUPPORTED' | 'METHOD_NOT_SUPPORTED' | 'UNSUPPORTED_PUBLIC_KEY_TYPE' | 'INVALID_DID_DOCUMENT' | 'INVALID_PUBLIC_KEY' | 'INVALID_PUBLIC_KEY_LENGTH' | 'INVALID_PUBLIC_KEY_TYPE' | 'INTERNAL_ERROR';
   problemDetails?: ProblemDetails;
@@ -75,8 +75,13 @@ export interface WitnessEntry {
 }
 
 export interface WitnessParameter {
-  threshold: number;
-  witnesses: WitnessEntry[];
+  threshold?: number;
+  witnesses?: WitnessEntry[];
+}
+
+export interface WitnessParameterResolution {
+  threshold?: string | number;
+  witnesses?: WitnessEntry[];
 }
 
 export interface DataIntegrityProof {
@@ -98,7 +103,7 @@ export interface DIDLogEntry {
     updateKeys?: string[];
     nextKeyHashes?: string[];
     portable?: boolean;
-    witness?: WitnessParameter | null;
+    witness?: WitnessParameter;
     watchers?: string[] | null;
     deactivated?: boolean;
   };
@@ -156,6 +161,7 @@ export interface UpdateDIDInterface {
   authentication?: string[];
   assertionMethod?: string[];
   keyAgreement?: string[];
+  witnessProofs?: WitnessProofFileEntry[];
 }
 
 export interface DeactivateDIDInterface {

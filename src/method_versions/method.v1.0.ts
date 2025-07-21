@@ -19,7 +19,18 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
   const path = options.paths?.join(':');
   const controller = `did:${METHOD}:${PLACEHOLDER}:${encodedDomain}${path ? `:${path}` : ''}`;
   const createdDate = createDate(options.created);
-  let {doc} = await createDIDDoc({...options, controller});
+  
+  // Safety guard: Strip secret keys from verification methods before creating DID document
+  const safeVerificationMethods = options.verificationMethods?.map(vm => {
+    if (vm.secretKeyMultibase) {
+      console.warn('Warning: Removing secretKeyMultibase from verification method - secret keys should not be stored in DID documents');
+      const { secretKeyMultibase, ...safeVm } = vm;
+      return safeVm;
+    }
+    return vm;
+  });
+  
+  let {doc} = await createDIDDoc({...options, controller, verificationMethods: safeVerificationMethods});
   const params = {
     scid: PLACEHOLDER,
     updateKeys: options.updateKeys,
@@ -325,17 +336,28 @@ export const updateDID = async (options: UpdateDIDInterface & { services?: any[]
     nextKeyHashes: options.nextKeyHashes ?? [],
     witness: (options.witness !== undefined && options.witness !== null) ? {
       witnesses: options.witness?.witnesses || [],
-      witnessThreshold: options.witness?.threshold || 0
+      threshold: options.witness?.threshold || 0
     } : {},
     watchers: watchersValue ?? []
   };
+  
+  // Safety guard: Strip secret keys from verification methods before creating DID document  
+  const safeVerificationMethods = options.verificationMethods?.map(vm => {
+    if (vm.secretKeyMultibase) {
+      console.warn('Warning: Removing secretKeyMultibase from verification method - secret keys should not be stored in DID documents');
+      const { secretKeyMultibase, ...safeVm } = vm;
+      return safeVm;
+    }
+    return vm;
+  });
+  
   const { doc } = await createDIDDoc({
     ...options,
     controller: options.controller || lastEntry.state.id || '',
     context: options.context || lastEntry.state['@context'],
     domain: options.domain ?? lastEntry.state.id?.split(':').at(-1) ?? '',
     updateKeys: options.updateKeys ?? [],
-    verificationMethods: options.verificationMethods ?? []
+    verificationMethods: safeVerificationMethods ?? []
   });
   
   // Add services if provided

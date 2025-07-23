@@ -68,7 +68,7 @@ function showHelp() {
 async function generateVerificationMethod(purpose: "authentication" | "assertionMethod" | "keyAgreement" | "capabilityInvocation" | "capabilityDelegation" = 'authentication'): Promise<VerificationMethod> {
   const keyPair = generateKeyPair();
   const publicKeyBytes = new Uint8Array([0xed, 0x01, ...keyPair.publicKey]);
-  const secretKeyBytes = new Uint8Array([0xed, 0x01, ...keyPair.secretKey]);
+  const secretKeyBytes = new Uint8Array([0x80, 0x26, ...keyPair.secretKey]);
   return {
     type: 'Multikey',
     publicKeyMultibase: multibaseEncode(publicKeyBytes, MultibaseEncoding.BASE58_BTC),
@@ -135,13 +135,23 @@ export async function handleCreate(args: string[]) {
   try {
     const authKey = await generateVerificationMethod();
     const crypto = createCustomCrypto(authKey)
+    
+    // Strip secret key from verification method for DID document (security)
+    const publicAuthKey = {
+      id: authKey.id,
+      type: authKey.type,
+      controller: authKey.controller,
+      publicKeyMultibase: authKey.publicKeyMultibase,
+      purpose: authKey.purpose
+    };
+    
     const { did, doc, meta, log } = await createDID({
       domain,
       paths,
       signer: crypto,
       verifier: crypto,
       updateKeys: [authKey.publicKeyMultibase!],
-      verificationMethods: [authKey],
+      verificationMethods: [publicAuthKey],
       portable,
       witness: witnesses?.length ? {
         witnesses: witnesses.map(witness => ({id: witness})),
@@ -172,10 +182,6 @@ export async function handleCreate(args: string[]) {
       });
       console.log(`DID verification method saved to env`);
 
-      // Write DID document for reference
-      const docPath = output.replace('.jsonl', '.json');
-      fs.writeFileSync(docPath, JSON.stringify(doc, null, 2).replace(/did:webvh:([^:]+)/g, 'did:web'));
-      console.log(`DID WEB document written to ${docPath}`);
     } else {
       // If no output specified, print to console
       console.log('DID Document:', JSON.stringify(doc, null, 2));
@@ -251,17 +257,29 @@ export async function handleUpdate(args: string[]) {
   try {
     const log = await readLogFromDisk(logFile);
     const { did, meta } = await resolveDIDFromLog(log, { verifier: createCustomCrypto() });
-    console.log('\nCurrent DID:', did);
-    console.log('Current meta:', meta);
+    // console.log('\nCurrent DID:', did);
+    // console.log('Current meta:', meta);
     
     // Get the verification method from environment
     const envVMs = JSON.parse(bufferToString(createBuffer(process.env.DID_VERIFICATION_METHODS || 'W10=', 'base64')));
     
-    const vm = envVMs.find((vm: any) => vm.controller === did);
-    console.log('\nFound VM:', vm);
+    let vm = envVMs.find((vm: any) => vm.controller === did);
     
     if (!vm) {
-      throw new Error('No matching verification method found for DID');
+      // Try to find VM by matching public key with current update keys
+      vm = envVMs.find((vm: any) => meta.updateKeys.includes(vm.publicKeyMultibase));
+    }
+    
+    if (!vm && envVMs.length > 0) {
+      // Fall back to first available VM with warning
+      console.warn('Warning: No matching verification method found for DID or update keys. Using first available VM.');
+      vm = envVMs[0];
+    }
+    
+    // console.log('\nFound VM:', vm);
+    
+    if (!vm) {
+      throw new Error('No verification method found in environment');
     }
 
     // Create verification methods array
@@ -278,7 +296,6 @@ export async function handleUpdate(args: string[]) {
           type: "Multikey",
           controller: did,
           publicKeyMultibase: vm.publicKeyMultibase,
-          secretKeyMultibase: vm.secretKeyMultibase,
           purpose: vmType as VerificationMethodType
         };
         verificationMethods.push(newVM);
@@ -290,7 +307,6 @@ export async function handleUpdate(args: string[]) {
         type: "Multikey",
         controller: did,
         publicKeyMultibase: vm.publicKeyMultibase,
-        secretKeyMultibase: vm.secretKeyMultibase,
         purpose: "assertionMethod"
       });
     }
@@ -314,11 +330,6 @@ export async function handleUpdate(args: string[]) {
     if (output) {
       await writeLogToDisk(output, result.log);
       console.log(`Updated DID log written to ${output}`);
-
-      // Write DID document for reference
-      const docPath = output.replace('.jsonl', '.json');
-      fs.writeFileSync(docPath, JSON.stringify(result.doc, null, 2).replace(/did:webvh:([^:]+)/g, 'did:web'));
-      console.log(`DID WEB document written to ${docPath}`);
     }
 
     return result;
@@ -342,8 +353,6 @@ export async function handleDeactivate(args: string[]) {
     // Read the current log to get the latest state
     const log = await readLogFromDisk(logFile);
     const { did, meta } = await resolveDIDFromLog(log);
-    console.log('Current DID:', did);
-    console.log('Current meta:', meta);
     
     // Get the verification method from environment
     const envContent = fs.readFileSync('.env', 'utf8');
@@ -353,13 +362,21 @@ export async function handleDeactivate(args: string[]) {
     }
 
     // Parse the VM from env
-    const vm = JSON.parse(bufferToString(createBuffer(vmMatch[1], 'base64')))[0];
-    if (!vm) {
+    const vms = JSON.parse(bufferToString(createBuffer(vmMatch[1], 'base64')));
+    if (!vms || vms.length === 0) {
       throw new Error('No verification method found in environment');
     }
 
-    // Use the current authorized key from meta
-    vm.publicKeyMultibase = meta.updateKeys[0];
+    // Find VM that matches the current update key
+    let vm = vms.find((v: any) => v.publicKeyMultibase === meta.updateKeys[0]);
+    
+    if (!vm) {
+      // If no matching VM found, use the first one and warn
+      console.warn('Warning: No matching verification method found for current update key. Using first available VM.');
+      vm = vms[0];
+    }
+
+    // Don't modify the publicKeyMultibase - it should match the secretKeyMultibase
 
     const crypto = createCustomCrypto(vm);
     const result = await deactivateDID({
@@ -535,3 +552,4 @@ if (process.argv[1] === import.meta.path) {
     process.exit(1);
   });
 }
+

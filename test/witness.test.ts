@@ -187,7 +187,7 @@ describe("Witness Implementation Tests", async () => {
     });
 
     const resolved = await resolveDIDFromLog(updatedDID.log, { verifier: testImplementation });
-    expect(resolved.meta.witness).toBeNull();
+    expect(resolved.meta.witness).toBeEmpty();
   });
 
   test("Verify witness proofs from did-witness.json", async () => {

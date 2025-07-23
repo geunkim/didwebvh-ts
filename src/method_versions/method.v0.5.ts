@@ -12,7 +12,7 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
     throw new Error('Update keys not supplied')
   }
   
-  if (options.witness && options.witness.witnesses.length > 0) {
+  if (options.witness && options.witness.witnesses && options.witness.witnesses.length > 0) {
     validateWitnessParameter(options.witness);
   }
   
@@ -20,7 +20,18 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
   const path = options.paths?.join(':');
   const controller = `did:${METHOD}:${PLACEHOLDER}:${encodedDomain}${path ? `:${path}` : ''}`;
   const createdDate = createDate(options.created);
-  let {doc} = await createDIDDoc({...options, controller});
+  
+  // Safety guard: Strip secret keys from verification methods before creating DID document
+  const safeVerificationMethods = options.verificationMethods?.map(vm => {
+    if (vm.secretKeyMultibase) {
+      console.warn('Warning: Removing secretKeyMultibase from verification method - secret keys should not be stored in DID documents');
+      const { secretKeyMultibase, ...safeVm } = vm;
+      return safeVm;
+    }
+    return vm;
+  });
+  
+  let {doc} = await createDIDDoc({...options, controller, verificationMethods: safeVerificationMethods});
   const params = {
     scid: PLACEHOLDER,
     updateKeys: options.updateKeys,
@@ -62,9 +73,9 @@ export const createDID = async (options: CreateDIDInterface): Promise<{did: stri
     throw new Error(`version ${prelimEntry.versionId} is invalid.`)
   }
 
-  let witness: WitnessParameterResolution | null = null;
+  let witness = {};
   if (params.witness) {
-    witness = {...params.witness, threshold: params.witness.threshold.toString()};
+    witness = {...params.witness, threshold: params.witness.threshold?.toString() || '0'};
   }
 
   return {
@@ -276,7 +287,7 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
 
       if (validProofs.length > 0) {
         await verifyWitnessProofs(resolutionLog[i], validProofs, meta.witness!, options.verifier);
-      } else if (parseInt(meta.witness.threshold.toString()) > 0) {
+      } else if (meta.witness && meta.witness.threshold && parseInt(meta.witness.threshold.toString()) > 0) {
         throw new Error('No witness proofs found for version ' + meta.versionId);
       }
     }
@@ -300,7 +311,7 @@ export const resolveDIDFromLog = async (log: DIDLog, options: ResolutionOptions 
   const finalMeta = resolvedMeta || lastValidMeta;
   finalMeta.latestVersionId = lastValidMeta.versionId;
   if (finalMeta.witness) {
-    finalMeta.witness.threshold = finalMeta.witness.threshold.toString();
+    finalMeta.witness.threshold = finalMeta.witness.threshold?.toString() || '0';
   }
 
   return {did: finalDoc.id, doc: finalDoc, meta: finalMeta};
@@ -320,20 +331,31 @@ export const updateDID = async (options: UpdateDIDInterface & { services?: any[]
     updateKeys: options.updateKeys ?? [],
     nextKeyHashes: options.nextKeyHashes ?? [],
     ...(options.witness === null ? {
-      witness: null
+      witness: {}
     } : options.witness !== undefined ? {
       witnesses: options.witness?.witnesses || [],
-      witnessThreshold: options.witness?.threshold || '0'
+      threshold: options.witness?.threshold || '0'
     } : {}),
     watchers: watchersValue ?? null
   };
+  
+  // Safety guard: Strip secret keys from verification methods before creating DID document  
+  const safeVerificationMethods = options.verificationMethods?.map(vm => {
+    if (vm.secretKeyMultibase) {
+      console.warn('Warning: Removing secretKeyMultibase from verification method - secret keys should not be stored in DID documents');
+      const { secretKeyMultibase, ...safeVm } = vm;
+      return safeVm;
+    }
+    return vm;
+  });
+  
   const { doc } = await createDIDDoc({
     ...options,
     controller: options.controller || lastEntry.state.id || '',
     context: options.context || lastEntry.state['@context'],
     domain: options.domain ?? lastEntry.state.id?.split(':').at(-1) ?? '',
     updateKeys: options.updateKeys ?? [],
-    verificationMethods: options.verificationMethods ?? []
+    verificationMethods: safeVerificationMethods ?? []
   });
   
   // Add services if provided

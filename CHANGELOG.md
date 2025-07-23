@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.4.0...v2.4.1) (2025-07-23)
+
+
+### Bug Fixes
+
+* enhance verification method handling and improve CLI tests ([275152e](https://github.com/decentralized-identity/didwebvh-ts/commit/275152e1d545051dfef673474c3ec4505ba47f94))
+
 # [2.4.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.3.2...v2.4.0) (2025-07-16)
 
 

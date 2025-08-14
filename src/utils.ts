@@ -7,17 +7,19 @@ import { createBuffer, bufferToString } from './utils/buffer';
 import { createMultihash, encodeBase58Btc, MultihashAlgorithm } from './utils/multiformats';
 import { createHash } from './utils/crypto';
 
-// Environment detection - treat React Native like a browser
-const isNodeEnvironment = typeof process !== 'undefined' && process.versions && process.versions.node && typeof window === 'undefined';
+// Environment detection - treat React Native like a browser, but Bun as Node-like
+const isNodeEnvironment = typeof process !== 'undefined'
+  && typeof window === 'undefined'
+  && !!(process.versions && (process.versions as any).node || (process.versions as any).bun);
 
-// Avoid bundlers including `fs` by constructing the module name at runtime
+// Avoid bundlers including `fs`: hide the specifier from static analyzers
 const fsModuleSpecifier = ['node', 'fs'].join(':');
-const dynamicImport = new Function('m', 'return import(m)') as (m: string) => Promise<any>;
+// We'll resolve require dynamically only in Node runtimes; otherwise use dynamic import with a non-literal
 
-let fsModule: typeof import('fs') | null = null;
-let fsImportPromise: Promise<typeof import('fs')> | null = null;
+let fsModule: any | null = null;
+let fsImportPromise: Promise<any> | null = null;
 
-const getFS = async (): Promise<typeof import('fs')> => {
+const getFS = async (): Promise<any> => {
   if (!isNodeEnvironment) {
     throw new Error('Filesystem access is not available in this environment (React Native, browser, or failed Node.js import)');
   }
@@ -30,13 +32,34 @@ const getFS = async (): Promise<typeof import('fs')> => {
     return fsImportPromise;
   }
   
-  fsImportPromise = dynamicImport(fsModuleSpecifier).then(module => {
-    fsModule = module;
-    return module;
-  }).catch(error => {
-    console.warn('Failed to import node:fs, filesystem operations will not be available:', error);
-    throw new Error('Filesystem access is not available in this environment (React Native, browser, or failed Node.js import)');
-  });
+  fsImportPromise = (async () => {
+    // Prefer require when present (Node)
+    const maybeRequire = (globalThis as any)["require"];
+    if (typeof maybeRequire === 'function') {
+      try {
+        const module = maybeRequire(fsModuleSpecifier);
+        fsModule = module;
+        return module;
+      } catch {}
+      try {
+        const module = maybeRequire('fs');
+        fsModule = module;
+        return module;
+      } catch {}
+    }
+    // Fallback to dynamic import (Bun/ESM)
+    try {
+      const module = await import(fsModuleSpecifier as any);
+      fsModule = module as any;
+      return module as any;
+    } catch {}
+    try {
+      const module = await import('fs' as any);
+      fsModule = module as any;
+      return module as any;
+    } catch {}
+    throw new Error('Filesystem access is not available in this environment (unable to load fs)');
+  })();
   
   return fsImportPromise;
 };

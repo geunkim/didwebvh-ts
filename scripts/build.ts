@@ -87,10 +87,10 @@ function createDistPackageJson() {
     name: pkg.name,
     version: pkg.version,
     type: "module",
+    "react-native": "./cjs/index.cjs",
     main: "./cjs/index.cjs",
     module: "./esm/index.js",
     browser: "./browser/index.js",
-    "react-native": "./cjs/index.cjs",
     types: "./types/index.d.ts",
     bin: {
       "didwebvh": "./cli/didwebvh.js"
@@ -104,10 +104,10 @@ function createDistPackageJson() {
     ],
     exports: {
       ".": {
+        "react-native": "./cjs/index.cjs",
         "browser": "./browser/index.js",
         "import": "./esm/index.js",
         "require": "./cjs/index.cjs",
-        "react-native": "./cjs/index.cjs",
         "types": "./types/index.d.ts"
       },
       "./types": {

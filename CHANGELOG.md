@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.1...v2.5.2) (2025-08-14)
+
+
+### Bug Fixes
+
+* enhance environment detection and dynamic fs import handling ([474fd2c](https://github.com/decentralized-identity/didwebvh-ts/commit/474fd2ccac84ef2c5ce6755d244dbbf10472c9ac))
+
 ## [2.5.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.0...v2.5.1) (2025-08-14)
 
 

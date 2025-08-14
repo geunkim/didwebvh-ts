@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.0...v2.5.1) (2025-08-14)
+
+
+### Bug Fixes
+
+* update React Native entry points in package.json ([95ad5d8](https://github.com/decentralized-identity/didwebvh-ts/commit/95ad5d88f2796b28bf45048452b4ddeaec586e16))
+
 # [2.5.0](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.4.1...v2.5.0) (2025-08-14)
 
 

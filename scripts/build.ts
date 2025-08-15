@@ -3,17 +3,13 @@ import pkg from "../package.json";
 import { existsSync, readdirSync, readFileSync, writeFileSync, renameSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 
-// Base externals list
-const baseExternals = [
-  ...Object.keys(pkg.dependencies || {})
-];
+
 
 // Library builds
 const browserConfig: BuildConfig = {
   entrypoints: ["./src/index.ts"],
   minify: true,
   sourcemap: "external",
-  external: baseExternals,
   target: "browser",
   format: "esm",
   outdir: "./dist/browser",
@@ -27,7 +23,6 @@ const esmConfig: BuildConfig = {
   entrypoints: ["./src/index.ts"],
   minify: false,
   sourcemap: "external",
-  external: baseExternals,
   target: "node",
   format: "esm",
   outdir: "./dist/esm",
@@ -52,7 +47,6 @@ const cjsConfig: BuildConfig = {
   entrypoints: ["./src/index.ts"],
   minify: false,
   sourcemap: "external",
-  external: baseExternals,
   target: "node",
   format: "cjs",
   outdir: "./dist/cjs",
@@ -68,7 +62,6 @@ const cliConfig: BuildConfig = {
   entrypoints: ["./src/cli.ts"],
   minify: false,
   sourcemap: "external",
-  external: baseExternals,
   target: "node",
   format: "esm",
   outdir: "./dist/cli",
@@ -164,7 +157,6 @@ async function renameCjsFiles() {
 }
 
 async function build() {
-  console.log("External packages:", baseExternals);
   
   // Clean dist directory first
   await Bun.spawn(["rm", "-rf", "dist"], {

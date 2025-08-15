@@ -1,3 +1,10 @@
+## [2.5.3](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.2...v2.5.3) (2025-08-15)
+
+
+### Bug Fixes
+
+* remove base externals from build configurations ([18a7a23](https://github.com/decentralized-identity/didwebvh-ts/commit/18a7a2339895155e6fa10c9a9dab23fccf29a203))
+
 ## [2.5.2](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.1...v2.5.2) (2025-08-14)
 
 

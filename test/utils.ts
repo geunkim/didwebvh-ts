@@ -70,7 +70,7 @@ export async function generateTestVerificationMethod(purpose: "authentication" |
     type: 'Multikey',
     publicKeyMultibase: publicKey,
     secretKeyMultibase: secretKey,
-    purpose,
+    purpose
   };
 }
 

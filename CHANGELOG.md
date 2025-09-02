@@ -1,3 +1,11 @@
+## [2.5.4](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.3...v2.5.4) (2025-09-02)
+
+
+### Bug Fixes
+
+* remove extra comma ([70ee446](https://github.com/decentralized-identity/didwebvh-ts/commit/70ee446c9192128eabd084c8b278783e7363a7fd))
+* update DID without recalculating verification methods ([15c47e7](https://github.com/decentralized-identity/didwebvh-ts/commit/15c47e7e6050a895eab7ee4abc55fe45baa94de3))
+
 ## [2.5.3](https://github.com/decentralized-identity/didwebvh-ts/compare/v2.5.2...v2.5.3) (2025-08-15)
 
 

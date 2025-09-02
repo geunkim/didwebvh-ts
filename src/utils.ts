@@ -402,30 +402,30 @@ export const normalizeVMs = (verificationMethod: VerificationMethod[] | undefine
   // First collect all VMs
   const vms = verificationMethod.map(vm => ({
     ...vm,
-    id: createVMID(vm, did)
+    id: vm.id ?? createVMID(vm, did)
   }));
   all.verificationMethod = vms;
 
   // Then handle relationships - default to authentication if no purpose is specified
   all.authentication = verificationMethod
     .filter(vm => !vm.purpose || vm.purpose === 'authentication')
-    .map(vm => createVMID(vm, did));
+    .map(vm => vm.id ?? createVMID(vm, did));
 
   all.assertionMethod = verificationMethod
     .filter(vm => vm.purpose === 'assertionMethod')
-    .map(vm => createVMID(vm, did));
+    .map(vm => vm.id ??createVMID(vm, did));
 
   all.keyAgreement = verificationMethod
     .filter(vm => vm.purpose === 'keyAgreement')
-    .map(vm => createVMID(vm, did));
+    .map(vm => vm.id ??createVMID(vm, did));
 
   all.capabilityDelegation = verificationMethod
     .filter(vm => vm.purpose === 'capabilityDelegation')
-    .map(vm => createVMID(vm, did));
+    .map(vm => vm.id ??createVMID(vm, did));
 
   all.capabilityInvocation = verificationMethod
     .filter(vm => vm.purpose === 'capabilityInvocation')
-    .map(vm => createVMID(vm, did));
+    .map(vm => vm.id ?? createVMID(vm, did));
 
   return all;
 };

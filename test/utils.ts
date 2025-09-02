@@ -61,11 +61,12 @@ export class MockFailingImplementation extends TestCryptoImplementation {
 }
 
 // Helper to generate verification method for tests
-export async function generateTestVerificationMethod(purpose: "authentication" | "assertionMethod" | "keyAgreement" | "capabilityInvocation" | "capabilityDelegation" = 'authentication'): Promise<VerificationMethod> {
+export async function generateTestVerificationMethod(purpose: "authentication" | "assertionMethod" | "keyAgreement" | "capabilityInvocation" | "capabilityDelegation" = 'authentication', id?: string): Promise<VerificationMethod> {
   const keyPair = crypto.generateKeyPair();
   const secretKey = multibaseEncode(new Uint8Array([0x80, 0x26, ...keyPair.secretKey]), MultibaseEncoding.BASE58_BTC);
   const publicKey = multibaseEncode(new Uint8Array([0xed, 0x01, ...keyPair.publicKey]), MultibaseEncoding.BASE58_BTC);
   return {
+    id,   
     type: 'Multikey',
     publicKeyMultibase: publicKey,
     secretKeyMultibase: secretKey,

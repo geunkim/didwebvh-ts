@@ -9,13 +9,14 @@ process.env.IGNORE_ASSERTION_DOCUMENT_STATE_IS_VALID = 'true';
 describe("resolveDIDFromLog with verificationMethod", () => {
   let initialDID: { did: string; doc: any; meta: any; log: DIDLog };
   let fullLog: DIDLog;
-  let authKey1: VerificationMethod, authKey2: VerificationMethod, keyAgreementKey: VerificationMethod;
+  let authKey1: VerificationMethod, authKey2: VerificationMethod, keyAgreementKey: VerificationMethod, assertionKey: VerificationMethod;
   let testImplementation: TestCryptoImplementation;
 
   beforeAll(async () => {
     authKey1 = await generateTestVerificationMethod();
     authKey2 = await generateTestVerificationMethod();
     keyAgreementKey = await generateTestVerificationMethod();
+    assertionKey = await generateTestVerificationMethod('assertionMethod', 'externallyDefinedId');
     testImplementation = new TestCryptoImplementation({ verificationMethod: authKey1 });
 
     // Create initial DID
@@ -49,6 +50,17 @@ describe("resolveDIDFromLog with verificationMethod", () => {
       verifier: testImplementation
     });
     fullLog = updateResult2.log;
+
+    // Update DID to add an assertion key
+    const updateResult3 = await updateDID({
+      log: fullLog,
+      signer: createTestSigner(authKey1),
+      updateKeys: [authKey1.publicKeyMultibase!],
+      verificationMethods: [authKey1, authKey2, keyAgreementKey, assertionKey],
+      updated: '2023-03-01T00:00:00Z',
+      verifier: testImplementation
+    });
+    fullLog = updateResult3.log;
   });
 
   test("Resolve DID with initial authentication key", async () => {
@@ -76,6 +88,16 @@ describe("resolveDIDFromLog with verificationMethod", () => {
     expect(doc.verificationMethod).toHaveLength(3);
     expect(doc.verificationMethod[2].publicKeyMultibase).toBe(keyAgreementKey.publicKeyMultibase);
     expect(meta.versionId.split('-')[0]).toBe("3");
+  });
+
+  test("Resolve DID with assertion authentication key (externally defined id)", async () => {
+    const vmId = `${initialDID.did}#${assertionKey.publicKeyMultibase!.slice(-8)}`;
+    const { doc, meta } = await resolveDIDFromLog(fullLog, { verificationMethod: vmId, verifier: testImplementation });
+    
+    expect(doc.verificationMethod).toHaveLength(4);
+    expect(doc.verificationMethod[3].publicKeyMultibase).toBe(assertionKey.publicKeyMultibase);
+    expect(doc.verificationMethod[3].id).toEndWith('externallyDefinedId');
+    expect(meta.versionId.split('-')[0]).toBe("4");
   });
 
   test("Resolve DID with non-existent verification method", async () => {
